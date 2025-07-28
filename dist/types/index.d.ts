@@ -1,17 +1,18 @@
+import { Room } from 'livekit-client';
 export interface ConvaiConfig {
     apiKey: string;
     characterId: string;
-    enableVideo?: boolean;
-    enableAudio?: boolean;
     url?: string;
+    enableAudio?: boolean;
+    enableVideo?: boolean;
     llmProvider?: string;
     actionConfig?: {
-        actions?: string[];
-        characters?: Array<{
+        actions: string[];
+        characters: Array<{
             name: string;
             bio: string;
         }>;
-        objects?: Array<{
+        objects: Array<{
             name: string;
             description: string;
         }>;
@@ -56,10 +57,10 @@ export interface VideoTrackRef {
     publication: any;
 }
 export interface ChatMessage {
-    user?: string;
-    convai?: string;
-    timestamp: number;
-    role: 'user' | 'convai' | 'assistant';
+    id: string;
+    type: 'user' | 'convai' | 'emotion' | 'behavior-tree';
+    content: string;
+    timestamp: string;
 }
 export interface ConvaiClientState {
     isConnected: boolean;
@@ -67,16 +68,17 @@ export interface ConvaiClientState {
     isListening: boolean;
     isThinking: boolean;
     isSpeaking: boolean;
-    agentState: AgentState;
+    agentState: 'disconnected' | 'connected' | 'listening' | 'thinking' | 'speaking';
 }
 export interface ConvaiClient {
     state: ConvaiClientState;
     connect: (config: ConvaiConfig) => Promise<void>;
-    disconnect: () => void;
-    messages: ChatMessage[];
-    transcriptions: TranscriptionSegment[];
-    room: any;
+    disconnect: () => Promise<void>;
+    messages: any[];
+    transcriptions: any[];
+    room: Room;
     videoTrack: any;
     audioTrack: any;
     sendRTVI: (triggerName: string, message?: string) => void;
+    chatMessages: ChatMessage[];
 }

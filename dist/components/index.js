@@ -6,3 +6,6 @@ export * from './VideoControls';
 export * from './CloseIcon';
 export * from './NoAgentNotification';
 export * from './AgentVisualizer';
+export * from './ChatBot';
+export * from './FloatingVideoDisplay';
+export * from './LiveKitVoiceAssistant';

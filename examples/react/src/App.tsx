@@ -1,40 +1,27 @@
-
+import { useCallback, useState } from "react";
+import { motion } from "framer-motion";
 import {
-  BarVisualizer,
-  VideoTrack,
-} from "@livekit/components-react";
-import { AnimatePresence, motion } from "framer-motion";
-import { RoomEvent } from "livekit-client";
-import { useCallback, useEffect, useState } from "react";
-import {
-  CloseIcon,
-  NoAgentNotification,
-  TranscriptionView,
-  LocalVideoDisplay,
-  VideoControls,
-  RTVITriggerControls,
   useConvaiClient,
+  ChatBot,
+  FloatingVideoDisplay,
 } from "airsurfer-livekit-react";
 import "./App.css";
 
 export default function App() {
-  // Use the unified client
   const convaiClient = useConvaiClient();
+  const [error, setError] = useState<string | null>(null);
 
   const onConnectButtonClicked = useCallback(async () => {
+    setError(null);
     try {
       await convaiClient.connect({
-        apiKey: 'ea401720eb28daa6810bab6508b4188f',
-        characterId: '6bae239c-11ab-11ef-9870-42010a7be00e',
+        apiKey: "ea401720eb28daa6810bab6508b4188f", // Replace with your actual API key
+        characterId: "6bae239c-11ab-11ef-9870-42010a7be00e", // Replace with your actual character ID
         enableVideo: true,
         enableAudio: true,
-        llmProvider: 'gemini-baml',
+        llmProvider: "gemini-baml",
         actionConfig: {
-          actions: [
-            "Wave",
-            "Flip your hair",
-            "Touch user's hair",
-          ],
+          actions: ["Wave", "Flip your hair", "Touch user's hair"],
           characters: [
             {
               name: "Ty",
@@ -44,175 +31,126 @@ export default function App() {
           ],
           objects: [
             { name: "Tresseme shampoo", description: "A shampoo bottle" },
-            { name: "Tresseme conditioner", description: "A conditioner bottle" },
+            {
+              name: "Tresseme conditioner",
+              description: "A conditioner bottle",
+            },
             { name: "Tresseme hairspray", description: "A hairspray bottle" },
           ],
           currentAttentionObject: "Tresseme shampoo",
         },
       });
     } catch (error) {
-      console.error('Connection failed:', error);
+      console.error("Failed to connect:", error);
+      setError(error instanceof Error ? error.message : "Connection failed");
     }
   }, [convaiClient]);
 
-  useEffect(() => {
-    if (convaiClient.room) {
-      convaiClient.room.on(RoomEvent.MediaDevicesError, onDeviceFailure);
-
-      return () => {
-        convaiClient.room?.off(RoomEvent.MediaDevicesError, onDeviceFailure);
-      };
-    }
-  }, [convaiClient.room]);
-
   return (
-    <main data-lk-theme="default" className="h-full grid content-center bg-[var(--lk-bg)]">
-      <div className="lk-room-container max-w-[1024px] w-[90vw] mx-auto max-h-[90vh]">
-        <SimpleVoiceAssistant onConnectButtonClicked={onConnectButtonClicked} convaiClient={convaiClient} />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-20 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-emerald-400/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-emerald-300/5 rounded-full blur-3xl animate-pulse delay-500"></div>
       </div>
-    </main>
-  );
-}
 
-function SimpleVoiceAssistant(props: { 
-  onConnectButtonClicked: () => void;
-  convaiClient: any;
-}) {
-  const { state: agentState } = props.convaiClient.state;
+      {/* Grid Pattern Overlay */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]"></div>
 
-  return (
-    <>
-      <AnimatePresence mode="wait">
-        {agentState === "disconnected" ? (
+      {/* Main Content */}
+      <div className="relative z-10 w-full h-screen flex items-center justify-center p-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="text-center max-w-3xl mx-auto"
+        >
           <motion.div
-            key="disconnected"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.3, ease: [0.09, 1.04, 0.245, 1.055] }}
-            className="grid items-center justify-center h-full"
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="mb-8"
           >
-            <motion.button
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-              className="uppercase px-4 py-2 bg-white text-black rounded-md"
-              onClick={() => props.onConnectButtonClicked()}
-            >
-              Start a conversation
-            </motion.button>
+            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600 bg-clip-text text-transparent mb-6 tracking-tight">
+              Convai Handsfree
+            </h1>
+            <div className="w-24 h-1 bg-gradient-to-r from-emerald-500 to-emerald-400 mx-auto rounded-full mb-8"></div>
           </motion.div>
-        ) : (
-          <motion.div
-            key="connected"
+
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3, ease: [0.09, 1.04, 0.245, 1.055] }}
-            className="flex flex-col items-center gap-4 h-full relative"
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-xl text-slate-300 mb-12 leading-relaxed max-w-2xl mx-auto"
           >
-            {/* Local video display in top-right corner */}
-            <div className="absolute top-4 right-4 z-10">
-              <LocalVideoDisplay room={props.convaiClient.room} />
-            </div>
-            
-            <AgentVisualizer convaiClient={props.convaiClient} />
-            <div className="flex-1 w-full">
-              <TranscriptionView transcriptions={props.convaiClient.transcriptions} />
-            </div>
-            
-            {/* RTVI Trigger Controls */}
-            <div className="w-full max-w-[512px]">
-              <RTVITriggerControls 
-                sendRTVI={props.convaiClient.sendRTVI}
-                isConnected={props.convaiClient.state.isConnected}
-              />
-            </div>
-            
-            <div className="w-full">
-              <ControlBar onConnectButtonClicked={props.onConnectButtonClicked} convaiClient={props.convaiClient} />
-            </div>
-            <NoAgentNotification state={agentState} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  );
-}
+            A React package for integrating Convai's AI-powered voice assistants
+            to web for real-time audio/video conversations.
+          </motion.p>
 
-function AgentVisualizer(props: { convaiClient: any }) {
-  const { videoTrack, audioTrack } = props.convaiClient;
-  const { agentState } = props.convaiClient.state;
-
-  if (videoTrack) {
-    return (
-      <div className="h-[512px] w-[512px] rounded-lg overflow-hidden">
-        <VideoTrack trackRef={videoTrack} />
-      </div>
-    );
-  }
-  return (
-    <div className="h-[300px] w-full">
-      <BarVisualizer
-        state={agentState}
-        barCount={5}
-        trackRef={audioTrack}
-        className="agent-visualizer"
-        options={{ minHeight: 24 }}
-      />
-    </div>
-  );
-}
-
-function ControlBar(props: { 
-  onConnectButtonClicked: () => void;
-  convaiClient: any;
-}) {
-  const { agentState } = props.convaiClient.state;
-
-  return (
-    <div className="relative h-[60px]">
-      <AnimatePresence>
-        {agentState === "disconnected" && (
-          <motion.button
-            initial={{ opacity: 0, top: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, top: "-10px" }}
-            transition={{ duration: 1, ease: [0.09, 1.04, 0.245, 1.055] }}
-            className="uppercase absolute left-1/2 -translate-x-1/2 px-4 py-2 bg-white text-black rounded-md"
-            onClick={() => props.onConnectButtonClicked()}
-          >
-            Start a conversation
-          </motion.button>
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {agentState !== "disconnected" && agentState !== "connecting" && (
-          <motion.div
-            initial={{ opacity: 0, top: "10px" }}
-            animate={{ opacity: 1, top: 0 }}
-            exit={{ opacity: 0, top: "-10px" }}
-            transition={{ duration: 0.4, ease: [0.09, 1.04, 0.245, 1.055] }}
-            className="flex h-8 absolute left-1/2 -translate-x-1/2 justify-center items-center gap-2"
-          >
-            <VideoControls room={props.convaiClient.room} />
-            <button
-              onClick={props.convaiClient.disconnect}
-              className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
+          {/* Error Display */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-300"
             >
-              <CloseIcon />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <p className="text-sm font-medium">Connection Error</p>
+              <p className="text-xs opacity-75 mt-1">{error}</p>
+            </motion.div>
+          )}
+
+          {!convaiClient.state.isConnected && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="space-y-6"
+            >
+              <div className="flex items-center justify-center space-x-3 text-slate-400">
+                <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium tracking-wide">
+                  Ready to connect
+                </span>
+              </div>
+              <p className="text-sm text-slate-500 max-w-md mx-auto">
+                Click the chat interface in the bottom right to start your
+                conversation
+              </p>
+            </motion.div>
+          )}
+
+          {convaiClient.state.isConnected && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center space-x-3 px-6 py-3 bg-emerald-500/10 backdrop-blur-sm border border-emerald-500/20 rounded-2xl"
+            >
+              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+              <span className="text-emerald-400 font-medium">
+                Connected & Ready
+              </span>
+            </motion.div>
+          )}
+        </motion.div>
+      </div>
+
+      {/* Floating Video Display Container */}
+      <div className="fixed bottom-5 left-5 z-[999]">
+        <FloatingVideoDisplay
+          room={convaiClient.room}
+          videoTrack={convaiClient.videoTrack}
+        />
+      </div>
+
+      {/* Floating Chat Container */}
+      <div className="fixed bottom-5 right-5 z-[999]">
+        <ChatBot
+          convaiClient={convaiClient}
+          onConnect={onConnectButtonClicked}
+        />
+      </div>
     </div>
   );
 }
-
-function onDeviceFailure(error: Error) {
-  console.error(error);
-  alert(
-    "Error acquiring camera or microphone permissions. Please make sure you grant the necessary permissions in your browser and reload the tab"
-  );
-}
-

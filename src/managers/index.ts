@@ -1,1 +1,2 @@
-// Managers are deprecated - use useConvaiClient instead 
+// Export managers here
+export * from './LiveKitManager'; 

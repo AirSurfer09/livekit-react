@@ -1,73 +1,149 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Room, RoomEvent, Track, RemoteTrack, LocalTrack } from 'livekit-client';
-import { ConvaiConfig, ConvaiClient, ConvaiClientState, ChatMessage, TranscriptionSegment } from '../types';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import { Room, RoomEvent } from 'livekit-client';
+import { ConvaiConfig, ConvaiClient, ConvaiClientState, ChatMessage } from '../types';
 
 const DEFAULT_CORE_SERVICE_URL = "https://realtime-api.convai.com";
 
-export const useConvaiClient = (): ConvaiClient => {
-  const [room, setRoom] = useState<Room | null>(null);
+export const useConvaiClient = (): ConvaiClient & { activity: string; chatMessages: ChatMessage[] } => {
+  const [room] = useState(new Room());
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [transcriptions, setTranscriptions] = useState<TranscriptionSegment[]>([]);
-  const [agentState, setAgentState] = useState<'disconnected' | 'connecting' | 'listening' | 'thinking' | 'speaking' | 'initializing'>('disconnected');
-  const [videoTrack, setVideoTrack] = useState<any>(null);
-  const [audioTrack, setAudioTrack] = useState<any>(null);
+  const [activity, setActivity] = useState<string>('Idle');
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+
+  // Data message listener effect
+  useEffect(() => {
+    if (!room) return;
+
+    const handleDataReceived = (payload: Uint8Array, participant: any) => {
+      try {
+        // Decode bytes to string
+        const decoder = new TextDecoder();
+        const messageString = decoder.decode(payload);
+        
+        // Parse JSON
+        const messageData = JSON.parse(messageString);
+        
+        // Enhanced logging with more context
+        console.group('📨 WebRTC Data Message Received');
+        console.log('From:', participant?.identity || 'Unknown participant');
+        console.log('Participant SID:', participant?.sid || 'Unknown');
+        console.log('Message Type:', messageData.type || 'No type specified');
+        console.log('Timestamp:', new Date().toISOString());
+        console.log('Raw bytes length:', payload.length);
+        console.log('Parsed Data:', messageData);
+        console.groupEnd();
+        
+        // Extract and categorize messages for chat display
+        const timestamp = new Date().toISOString();
+        const messageId = `${messageData.type}-${Date.now()}-${Math.random()}`;
+        
+        // Handle different message types
+        switch (messageData.type) {
+          case 'user-llm-text':
+            // User chat message
+            if (messageData.data?.text) {
+              const userMessage: ChatMessage = {
+                id: messageId,
+                type: 'user',
+                content: messageData.data.text,
+                timestamp
+              };
+              setChatMessages(prev => [...prev, userMessage]);
+              console.log('💬 User Message:', messageData.data.text);
+            }
+            break;
+            
+          case 'bot-llm-text':
+            // Convai response
+            if (messageData.data?.text) {
+              const convaiMessage: ChatMessage = {
+                id: messageId,
+                type: 'convai',
+                content: messageData.data.text,
+                timestamp
+              };
+              setChatMessages(prev => [...prev, convaiMessage]);
+              console.log('🤖 Convai Response:', messageData.data.text);
+            }
+            break;
+            
+          case 'server-message':
+            // Handle server messages
+            if (messageData.data?.emotion) {
+              // Emotion display
+              const emotionMessage: ChatMessage = {
+                id: messageId,
+                type: 'emotion',
+                content: messageData.data.emotion,
+                timestamp
+              };
+              setChatMessages(prev => [...prev, emotionMessage]);
+              console.log('😊 Emotion:', messageData.data.emotion);
+            } else if (messageData.data?.type === 'behavior-tree-response' && messageData.data?.narrative_section_id) {
+              // Behavior tree response
+              const behaviorMessage: ChatMessage = {
+                id: messageId,
+                type: 'behavior-tree',
+                content: messageData.data.narrative_section_id,
+                timestamp
+              };
+              setChatMessages(prev => [...prev, behaviorMessage]);
+              console.log('🌳 Behavior Tree:', messageData.data.narrative_section_id);
+            }
+            break;
+        }
+        
+        // Special handling for RTVI messages
+        if (messageData.type && messageData.type.includes('rtvi')) {
+          console.log('🤖 RTVI Message:', messageData);
+        }
+        
+        // Special handling for trigger messages
+        if (messageData.type === 'trigger-message') {
+          console.log('🎯 Trigger Message Response:', messageData);
+        }
+        
+      } catch (error) {
+        console.group('❌ Failed to parse incoming data message');
+        console.error('Parse Error:', error);
+        console.log('Raw bytes length:', payload.length);
+        
+        // Try to decode as string even if JSON parsing fails
+        try {
+          const decoder = new TextDecoder();
+          const messageString = decoder.decode(payload);
+          console.log('Raw string content:', messageString);
+        } catch (decodeError) {
+          console.error('Failed to decode as string:', decodeError);
+          console.log('Raw bytes (first 100):', Array.from(payload.slice(0, 100)));
+        }
+        
+        console.groupEnd();
+      }
+    };
+
+    // Listen for data received events
+    room.on(RoomEvent.DataReceived, handleDataReceived);
+
+    console.log('🔄 Data message listener initialized in useConvaiClient');
+
+    // Cleanup listener on unmount
+    return () => {
+      room.off(RoomEvent.DataReceived, handleDataReceived);
+      console.log('🔄 Data message listener cleaned up from useConvaiClient');
+    };
+  }, [room]);
 
   // Create client state
   const state: ConvaiClientState = useMemo(() => ({
     isConnected,
     isConnecting,
-    isListening: agentState === 'listening',
-    isThinking: agentState === 'thinking',
-    isSpeaking: agentState === 'speaking',
-    agentState
-  }), [isConnected, isConnecting, agentState]);
-
-  // Process transcriptions into chat messages
-  useEffect(() => {
-    const newMessages: ChatMessage[] = transcriptions.map((segment: TranscriptionSegment) => ({
-      [segment.role === 'user' ? 'user' : 'convai']: segment.text,
-      timestamp: segment.firstReceivedTime,
-      role: segment.role === 'assistant' ? 'convai' : segment.role
-    }));
-    
-    setMessages(newMessages);
-  }, [transcriptions]);
-
-  // Handle data messages
-  const handleDataReceived = useCallback((payload: Uint8Array, participant: any) => {
-    try {
-      const decoder = new TextDecoder();
-      const messageString = decoder.decode(payload);
-      const messageData = JSON.parse(messageString);
-      
-      console.group('📨 WebRTC Data Message Received');
-      console.log('From:', participant?.identity || 'Unknown participant');
-      console.log('Message Type:', messageData.type || 'No type specified');
-      console.log('Parsed Data:', messageData);
-      console.groupEnd();
-      
-      // Handle transcription messages
-      if (messageData.type === 'transcription') {
-        const newTranscription: TranscriptionSegment = {
-          id: Date.now().toString(),
-          text: messageData.data.text || '',
-          role: messageData.data.role || 'assistant',
-          firstReceivedTime: Date.now()
-        };
-        setTranscriptions(prev => [...prev, newTranscription]);
-      }
-      
-      // Handle agent state updates
-      if (messageData.type === 'agent-state') {
-        setAgentState(messageData.data.state || 'disconnected');
-      }
-      
-    } catch (error) {
-      console.error('Failed to parse data message:', error);
-    }
-  }, []);
+    isListening: false, // Will be managed by useVoiceAssistant
+    isThinking: false,  // Will be managed by useVoiceAssistant
+    isSpeaking: false,  // Will be managed by useVoiceAssistant
+    agentState: 'disconnected' as const
+  }), [isConnected, isConnecting]);
 
   // Connect function
   const connect = useCallback(async (config: ConvaiConfig) => {
@@ -76,23 +152,9 @@ export const useConvaiClient = (): ConvaiClient => {
     }
 
     setIsConnecting(true);
-    setAgentState('connecting');
+    setActivity('Connecting...');
     
     try {
-      // Create new room instance
-      const newRoom = new Room();
-      setRoom(newRoom);
-
-      // Set up room event listeners
-      newRoom.on(RoomEvent.DataReceived, handleDataReceived);
-      newRoom.on(RoomEvent.TrackSubscribed, (track: RemoteTrack, publication: any, participant: any) => {
-        if (track.kind === Track.Kind.Video) {
-          setVideoTrack({ track, publication, participant });
-        } else if (track.kind === Track.Kind.Audio) {
-          setAudioTrack({ track, publication, participant });
-        }
-      });
-
       // Prepare request body with defaults
       const requestBody = {
         character_id: config.characterId,
@@ -101,6 +163,13 @@ export const useConvaiClient = (): ConvaiClient => {
         llm_provider: config.llmProvider || "gemini-baml",
         ...(config.actionConfig && { action_config: config.actionConfig })
       };
+
+      console.log('Connecting to Convai with config:', {
+        url: config.url || DEFAULT_CORE_SERVICE_URL,
+        characterId: config.characterId,
+        llmProvider: config.llmProvider || "gemini-baml",
+        hasActionConfig: !!config.actionConfig
+      });
 
       // Call Core Service API
       const response = await fetch(`${config.url || DEFAULT_CORE_SERVICE_URL}/connect`, {
@@ -113,104 +182,102 @@ export const useConvaiClient = (): ConvaiClient => {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('API Error Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        });
+        
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          } else if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+        } catch (e) {
+          // If we can't parse the error, use the raw text
+          if (errorText) {
+            errorMessage = `${errorMessage}: ${errorText}`;
+          }
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const connectionData = await response.json();
       console.log('Connection data received:', connectionData);
       
-      // Connect to room
-      await newRoom.connect(
-        connectionData.room_url,
-        connectionData.token,
-        {
-          rtcConfig: {
-            iceTransportPolicy: 'relay'
-          }
+      // Connect to LiveKit room
+      await room.connect(connectionData.room_url, connectionData.token, {
+        rtcConfig: {
+          iceTransportPolicy: 'relay'
         }
-      );
-      
-      // Enable audio/video based on config
+      });
+
+      // Enable mic/camera based on config
       if (config.enableAudio !== false) {
-        await newRoom.localParticipant.setMicrophoneEnabled(true);
+        await room.localParticipant.setMicrophoneEnabled(true);
       }
-      
       if (config.enableVideo !== false) {
-        await newRoom.localParticipant.setCameraEnabled(true);
+        await room.localParticipant.setCameraEnabled(true);
       }
-      
+
       setIsConnected(true);
-      setAgentState('listening');
+      setActivity('Connected');
+      
       console.log('Connected to room:', connectionData.room_name);
       console.log('Session ID:', connectionData.session_id);
       
     } catch (error) {
       console.error('Connection failed:', error);
       setIsConnected(false);
-      setAgentState('disconnected');
+      setActivity('Connection failed');
       throw error;
     } finally {
       setIsConnecting(false);
     }
-  }, [handleDataReceived]);
+  }, [room]);
 
   // Disconnect function
-  const disconnect = useCallback(() => {
+  const disconnect = useCallback(async () => {
     if (room) {
-      room.disconnect();
+      await room.disconnect();
       setIsConnected(false);
-      setAgentState('disconnected');
-      setRoom(null);
-      setVideoTrack(null);
-      setAudioTrack(null);
-      setTranscriptions([]);
-      setMessages([]);
+      setActivity('Disconnected');
+      // Clear chat messages on disconnect
+      setChatMessages([]);
     }
   }, [room]);
 
-  // RTVI trigger function
+  // Send RTVI trigger
   const sendRTVI = useCallback((triggerName: string, message?: string) => {
-    if (!room || !isConnected) {
-      console.warn('Cannot send RTVI: not connected');
-      return;
+    if (room && room.localParticipant) {
+      const data = {
+        type: 'rtvi-trigger',
+        trigger: triggerName,
+        message: message || ''
+      };
+      room.localParticipant.publishData(new TextEncoder().encode(JSON.stringify(data)), {
+        reliable: true,
+      });
     }
-
-    const payload = {
-      type: 'rtvi-trigger',
-      data: {
-        trigger_name: triggerName,
-        trigger_message: message || ''
-      }
-    };
-
-    try {
-      const encoder = new TextEncoder();
-      const bytes = encoder.encode(JSON.stringify(payload));
-      room.localParticipant.publishData(bytes);
-      console.log('RTVI trigger sent:', payload);
-    } catch (error) {
-      console.error('Failed to send RTVI trigger:', error);
-    }
-  }, [room, isConnected]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (room) {
-        room.disconnect();
-      }
-    };
   }, [room]);
 
+  // Return client object with activity and chat messages
   return {
     state,
     connect,
     disconnect,
-    messages,
-    transcriptions,
+    messages: [], // Will be managed by useCombinedTranscriptions
+    transcriptions: [], // Will be managed by useCombinedTranscriptions
     room,
-    videoTrack,
-    audioTrack,
-    sendRTVI
+    videoTrack: null, // Will be managed by useVoiceAssistant
+    audioTrack: null, // Will be managed by useVoiceAssistant
+    sendRTVI,
+    activity,
+    chatMessages,
   };
 }; 
