@@ -1,14 +1,11 @@
-// Main exports
-export { ConvaiClient } from './ConvaiClient';
-
-// Hooks
-export * from './hooks';
-
-// Managers
-export * from './managers';
+// Main unified client export
+export { useConvaiClient } from './hooks/useConvaiClient';
 
 // Types
 export * from './types';
 
-// Components
-export * from './components'; 
+// Components (for advanced usage)
+export * from './components';
+
+// Individual hooks (for advanced usage)
+export * from './hooks'; 

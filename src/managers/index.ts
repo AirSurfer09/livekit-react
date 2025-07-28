@@ -1,2 +1,1 @@
-// Export managers here
-export * from './ConnectionManager'; 
+// Managers are deprecated - use useConvaiClient instead 

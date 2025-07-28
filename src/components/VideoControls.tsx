@@ -1,20 +1,23 @@
-import { useLocalParticipant } from "@livekit/components-react";
+import { Room } from "livekit-client";
 import { useState, useEffect } from "react";
 
-export function VideoControls() {
-  const { localParticipant } = useLocalParticipant();
+export interface VideoControlsProps {
+  room?: Room | null;
+}
+
+export function VideoControls({ room }: VideoControlsProps) {
   const [isCameraEnabled, setIsCameraEnabled] = useState(false);
 
   useEffect(() => {
-    if (localParticipant) {
-      setIsCameraEnabled(localParticipant.isCameraEnabled);
+    if (room && room.localParticipant) {
+      setIsCameraEnabled(room.localParticipant.isCameraEnabled);
     }
-  }, [localParticipant]);
+  }, [room]);
 
   const toggleCamera = async () => {
-    if (localParticipant) {
+    if (room && room.localParticipant) {
       try {
-        await localParticipant.setCameraEnabled(!isCameraEnabled);
+        await room.localParticipant.setCameraEnabled(!isCameraEnabled);
         setIsCameraEnabled(!isCameraEnabled);
       } catch (error) {
         console.error('Failed to toggle camera:', error);

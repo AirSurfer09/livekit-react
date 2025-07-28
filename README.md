@@ -1,248 +1,113 @@
 # Airsurfer LiveKit React
 
-A LiveKit React integration package for Convai, providing React components and hooks for building real-time communication applications with connection handling, chat transcriptions, and RTVI triggers.
+A React package for integrating Convai's AI-powered voice assistants with LiveKit for real-time audio/video conversations.
 
-## Features
+## Quick Start
 
-- **Connection Management**: Complete Convai connection handling with Core Service API integration
-- **Chat Transcriptions**: Real-time transcription display for both user and assistant messages
-- **RTVI Triggers**: Send trigger messages and commands through LiveKit data channels
-- **Local Video Display**: Show local camera feed with controls
-- **Video Controls**: Toggle camera on/off functionality
-- **Data Message Listener**: Listen to incoming WebRTC data messages
-- **Agent Notifications**: Status notifications for agent connection
-- **React Components**: Pre-built components for common UI patterns
-- **Custom Hooks**: Easy-to-use hooks for managing state and interactions
-- **TypeScript Support**: Full type safety throughout the package
-- **ESM-only Build**: Modern module system support
-
-## Installation
-
-```bash
-pnpm install
-```
-
-## Development
-
-```bash
-# Install dependencies
-pnpm examples:install
-
-# Start development server
-pnpm examples:dev
-
-# Build the package
-pnpm build
-
-# Build examples
-pnpm examples:build
-```
-
-## Usage
-
-### Basic Connection
-
-```typescript
+```tsx
 import { useConvaiClient } from 'airsurfer-livekit-react';
 
 function MyComponent() {
-  const { connect, disconnect, isConnected, isConnecting } = useConvaiClient();
+  const convaiClient = useConvaiClient();
 
-  const handleConnect = async () => {
-    await connect({
-      token: 'your-api-key',
-      character_id: 'your-character-id',
-      transport: 'livekit',
-      connection_type: 'audio',
-      llm_provider: 'gemini'
-    });
+  const startConversation = async () => {
+    try {
+      await convaiClient.connect({
+        apiKey: 'your-api-key',
+        characterId: 'your-character-id',
+        enableVideo: true,
+        enableAudio: true,
+        llmProvider: 'gemini-baml', // optional, defaults to gemini-baml
+        actionConfig: {
+          actions: ['Wave', 'Point'],
+          characters: [
+            { name: 'Assistant', bio: 'A helpful AI assistant' },
+            { name: 'User', bio: 'The user' }
+          ],
+          objects: [
+            { name: 'Coffee Cup', description: 'A coffee cup' }
+          ],
+          currentAttentionObject: 'Coffee Cup'
+        }
+      });
+    } catch (error) {
+      console.error('Connection failed:', error);
+    }
   };
 
   return (
     <div>
-      {!isConnected && (
-        <button onClick={handleConnect}>Connect</button>
-      )}
-      {isConnected && (
-        <button onClick={disconnect}>Disconnect</button>
-      )}
-    </div>
-  );
-}
-```
-
-### RTVI Triggers
-
-```typescript
-import { useRTVITriggerSender } from 'airsurfer-livekit-react';
-
-function TriggerComponent() {
-  const { sendTriggerByName, sendTriggerByMessage } = useRTVITriggerSender();
-
-  const handleTrigger = async () => {
-    await sendTriggerByName('ENTER_SPACESHIP');
-  };
-
-  return (
-    <button onClick={handleTrigger}>
-      Enter Spaceship
-    </button>
-  );
-}
-```
-
-### Transcription View
-
-```typescript
-import { TranscriptionView } from 'airsurfer-livekit-react';
-
-function ChatComponent() {
-  return (
-    <TranscriptionView 
-      maxHeight="300px"
-      maxWidth="600px"
-    />
-  );
-}
-```
-
-### Complete Example
-
-```typescript
-import React from 'react';
-import { RoomContext } from '@livekit/components-react';
-import { 
-  ConvaiClient, 
-  RTVITriggerControls, 
-  TranscriptionView,
-  LocalVideoDisplay,
-  VideoControls,
-  CloseIcon,
-  NoAgentNotification,
-  useConvaiClient,
-  useDataMessageListener
-} from 'airsurfer-livekit-react';
-
-function App() {
-  const { connect, disconnect, isConnected, room } = useConvaiClient();
-
-  return (
-    <div>
-      {!isConnected ? (
-        <button onClick={() => connect(config)}>Connect</button>
+      {!convaiClient.state.isConnected ? (
+        <button onClick={startConversation}>Start Conversation</button>
       ) : (
-        <RoomContext.Provider value={room}>
-          <ConvaiClient>
-            <LocalVideoDisplay />
-            <TranscriptionView />
-            <RTVITriggerControls />
-            <VideoControls />
-            <NoAgentNotification state="connecting" />
-            <DataMessageListener />
-            <button onClick={disconnect}>
-              <CloseIcon />
-              Disconnect
-            </button>
-          </ConvaiClient>
-        </RoomContext.Provider>
+        <div>
+          <p>Status: {convaiClient.state.agentState}</p>
+          <button onClick={convaiClient.disconnect}>Disconnect</button>
+          
+          {/* Display chat messages */}
+          {convaiClient.messages.map((message, index) => (
+            <div key={index}>
+              {message.user && <p>User: {message.user}</p>}
+              {message.convai && <p>Assistant: {message.convai}</p>}
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
 }
-
-// Invisible component for data message listening
-function DataMessageListener() {
-  useDataMessageListener();
-  return null;
-}
 ```
 
-### Local Video Display
+## Configuration
 
-```typescript
-import { LocalVideoDisplay } from 'airsurfer-livekit-react';
+### Required Fields
+- `apiKey`: Your Convai API key
+- `characterId`: The ID of the character to connect to
 
-function VideoComponent() {
-  return (
-    <div className="flex justify-center">
-      <LocalVideoDisplay />
-    </div>
-  );
-}
+### Optional Fields
+- `enableVideo`: Enable video (default: true)
+- `enableAudio`: Enable audio (default: true)
+- `url`: Custom core service URL (default: https://realtime-api.convai.com)
+- `llmProvider`: LLM provider (default: gemini-baml)
+- `actionConfig`: Configuration for RTVI actions and objects
+
+## Client Interface
+
+The `useConvaiClient` hook returns a client object with:
+
+### State
+- `state.isConnected`: Connection status
+- `state.isConnecting`: Connecting status
+- `state.agentState`: Current agent state (disconnected, connecting, listening, thinking, speaking)
+- `state.isListening`: Whether the agent is listening
+- `state.isThinking`: Whether the agent is thinking
+- `state.isSpeaking`: Whether the agent is speaking
+
+### Methods
+- `connect(config)`: Connect to a character
+- `disconnect()`: Disconnect from the current session
+- `sendRTVI(triggerName, message?)`: Send RTVI trigger
+
+### Data
+- `messages`: Array of chat messages in format `{user?: string, convai?: string, timestamp: number, role: string}`
+- `transcriptions`: Raw transcription segments
+- `room`: LiveKit room instance
+- `videoTrack`: Video track reference
+- `audioTrack`: Audio track reference
+
+## Advanced Usage
+
+For advanced usage, you can also import individual components and hooks:
+
+```tsx
+import { 
+  TranscriptionView, 
+  LocalVideoDisplay, 
+  VideoControls,
+  RTVITriggerControls 
+} from 'airsurfer-livekit-react';
 ```
-
-### Video Controls
-
-```typescript
-import { VideoControls } from 'airsurfer-livekit-react';
-
-function ControlsComponent() {
-  return (
-    <div className="flex gap-4">
-      <VideoControls />
-      {/* Other controls */}
-    </div>
-  );
-}
-```
-
-### Data Message Listening
-
-```typescript
-import { useDataMessageListener } from 'airsurfer-livekit-react';
-
-function MessageListener() {
-  const { isListening } = useDataMessageListener();
-  
-  return (
-    <div>
-      {isListening && <p>Listening for messages...</p>}
-    </div>
-  );
-}
-```
-
-## API Reference
-
-### Hooks
-
-- `useConvaiClient()` - Main connection management hook
-- `useRTVITriggerSender()` - RTVI trigger message sending
-- `useCombinedTranscriptions()` - Combined user and assistant transcriptions
-- `useLocalMicTrack()` - Local microphone track reference
-- `useLocalCameraTrack()` - Local camera track reference
-- `useDataMessageListener()` - Listen to incoming data messages
-
-### Components
-
-- `ConvaiClient` - Main wrapper component
-- `RTVITriggerControls` - UI for sending RTVI triggers
-- `TranscriptionView` - Display for chat transcriptions
-- `LocalVideoDisplay` - Local camera feed display
-- `VideoControls` - Camera toggle controls
-- `CloseIcon` - Simple close icon component
-- `NoAgentNotification` - Agent connection status notification
-
-### Types
-
-- `ConvaiConfig` - Configuration for connection
-- `ConnectionData` - Response data from connection
-- `TriggerPayload` - RTVI trigger message payload
-- `TranscriptionSegment` - Individual transcription segment
-- `DataMessage` - Incoming data message structure
-- `AgentState` - Agent connection state
-- `VideoTrackRef` - Video track reference
 
 ## Examples
 
-The package includes a complete React example in the `examples/react` directory that demonstrates:
-
-- Connection setup and management
-- Real-time transcription display
-- RTVI trigger controls
-- Error handling
-- UI state management
-
-## License
-
-MIT 
+See the `examples/react` directory for a complete working example. 

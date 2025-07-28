@@ -1,22 +1,26 @@
 import React, { useState } from "react";
-import { useRTVITriggerSender } from "../hooks/useRTVITriggerSender";
 
 export interface RTVITriggerControlsProps {
+  sendRTVI?: (triggerName: string, message?: string) => void;
+  isConnected?: boolean;
   className?: string;
 }
 
-export const RTVITriggerControls: React.FC<RTVITriggerControlsProps> = ({ className = "" }) => {
-  const { sendTriggerByName, sendTriggerByMessage, isConnected } = useRTVITriggerSender();
+export const RTVITriggerControls: React.FC<RTVITriggerControlsProps> = ({ 
+  sendRTVI,
+  isConnected = false,
+  className = "" 
+}) => {
   const [triggerName, setTriggerName] = useState("");
   const [triggerMessage, setTriggerMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSendTriggerName = async () => {
-    if (!triggerName.trim()) return;
+    if (!triggerName.trim() || !sendRTVI) return;
     
     setIsLoading(true);
     try {
-      await sendTriggerByName(triggerName);
+      sendRTVI(triggerName);
       setTriggerName("");
     } catch (error) {
       console.error('Failed to send trigger by name:', error);
@@ -26,11 +30,11 @@ export const RTVITriggerControls: React.FC<RTVITriggerControlsProps> = ({ classN
   };
 
   const handleSendTriggerMessage = async () => {
-    if (!triggerMessage.trim()) return;
+    if (!triggerMessage.trim() || !sendRTVI) return;
     
     setIsLoading(true);
     try {
-      await sendTriggerByMessage(triggerMessage);
+      sendRTVI('custom-message', triggerMessage);
       setTriggerMessage("");
     } catch (error) {
       console.error('Failed to send trigger by message:', error);
@@ -47,9 +51,11 @@ export const RTVITriggerControls: React.FC<RTVITriggerControlsProps> = ({ classN
   ];
 
   const handleQuickTrigger = async (triggerName: string) => {
+    if (!sendRTVI) return;
+    
     setIsLoading(true);
     try {
-      await sendTriggerByName(triggerName);
+      sendRTVI(triggerName);
     } catch (error) {
       console.error('Failed to send quick trigger:', error);
     } finally {

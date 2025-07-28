@@ -1,5 +1,4 @@
-export { ConvaiClient } from './ConvaiClient';
-export * from './hooks';
-export * from './managers';
+export { useConvaiClient } from './hooks/useConvaiClient';
 export * from './types';
 export * from './components';
+export * from './hooks';

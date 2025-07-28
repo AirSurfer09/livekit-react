@@ -1,18 +1,19 @@
 import React, { useRef, useEffect } from "react";
-import useCombinedTranscriptions from "../hooks/useCombinedTranscriptions";
+import { TranscriptionSegment } from "../types";
 
 export interface TranscriptionViewProps {
+  transcriptions?: TranscriptionSegment[];
   className?: string;
   maxHeight?: string;
   maxWidth?: string;
 }
 
 export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ 
+  transcriptions = [],
   className = "",
   maxHeight = "200px",
   maxWidth = "512px"
 }) => {
-  const combinedTranscriptions = useCombinedTranscriptions();
   const containerRef = useRef<HTMLDivElement>(null);
 
   // scroll to bottom when new transcription is added
@@ -20,7 +21,7 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
-  }, [combinedTranscriptions]);
+  }, [transcriptions]);
 
   return (
     <div className={`relative mx-auto ${className}`} style={{ height: maxHeight, width: maxWidth, maxWidth: '90vw' }}>
@@ -30,7 +31,7 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({
 
       {/* Scrollable content */}
       <div ref={containerRef} className="h-full flex flex-col gap-2 overflow-y-auto px-4 py-8">
-        {combinedTranscriptions.map((segment) => (
+        {transcriptions.map((segment) => (
           <div
             id={segment.id}
             key={segment.id}

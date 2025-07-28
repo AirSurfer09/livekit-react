@@ -1,17 +1,15 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState } from "react";
-import { useRTVITriggerSender } from "../hooks/useRTVITriggerSender";
-export const RTVITriggerControls = ({ className = "" }) => {
-    const { sendTriggerByName, sendTriggerByMessage, isConnected } = useRTVITriggerSender();
+export const RTVITriggerControls = ({ sendRTVI, isConnected = false, className = "" }) => {
     const [triggerName, setTriggerName] = useState("");
     const [triggerMessage, setTriggerMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const handleSendTriggerName = async () => {
-        if (!triggerName.trim())
+        if (!triggerName.trim() || !sendRTVI)
             return;
         setIsLoading(true);
         try {
-            await sendTriggerByName(triggerName);
+            sendRTVI(triggerName);
             setTriggerName("");
         }
         catch (error) {
@@ -22,11 +20,11 @@ export const RTVITriggerControls = ({ className = "" }) => {
         }
     };
     const handleSendTriggerMessage = async () => {
-        if (!triggerMessage.trim())
+        if (!triggerMessage.trim() || !sendRTVI)
             return;
         setIsLoading(true);
         try {
-            await sendTriggerByMessage(triggerMessage);
+            sendRTVI('custom-message', triggerMessage);
             setTriggerMessage("");
         }
         catch (error) {
@@ -43,9 +41,11 @@ export const RTVITriggerControls = ({ className = "" }) => {
         { name: "EXPLORE_PLANET", label: "Explore Planet" },
     ];
     const handleQuickTrigger = async (triggerName) => {
+        if (!sendRTVI)
+            return;
         setIsLoading(true);
         try {
-            await sendTriggerByName(triggerName);
+            sendRTVI(triggerName);
         }
         catch (error) {
             console.error('Failed to send quick trigger:', error);
