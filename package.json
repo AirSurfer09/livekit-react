@@ -1,0 +1,48 @@
+{
+  "name": "airsurfer-livekit-react",
+  "version": "1.0.0",
+  "description": "A LiveKit React integration package for Convai",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run clean && npm run build",
+    "example:react": "cd examples/react && pnpm dev",
+    "example:react:build": "cd examples/react && pnpm build",
+    "examples:dev": "pnpm example:react",
+    "examples:build": "pnpm example:react:build",
+    "examples:install": "pnpm install && cd examples/react && pnpm install",
+    "examples:clean": "pnpm clean && cd examples/react && pnpm clean"
+  },
+  "keywords": ["livekit", "convai", "react", "typescript"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@livekit/components-react": "^2.9.3",
+    "@livekit/components-styles": "^1.1.4",
+    "livekit-client": "^2.8.0",
+    "framer-motion": "^11.18.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "rimraf": "^5.0.0",
+    "@types/node": "^20.17.13",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+} 
