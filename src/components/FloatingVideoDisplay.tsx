@@ -117,8 +117,8 @@ export const FloatingVideoDisplay: React.FC<FloatingVideoDisplayProps> = ({
 
   return (
     <RoomContext.Provider value={room}>
-      <div className="relative">
-        <div className="glass-light rounded-t-2xl px-4 py-3 mb-2 border-b border-emerald-500/20">
+      <div className="relative" >
+        {/* <div className="glass-light rounded-t-2xl px-4 py-3 mb-2 border-b border-emerald-500/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse shadow-lg"></div>
@@ -143,7 +143,7 @@ export const FloatingVideoDisplay: React.FC<FloatingVideoDisplayProps> = ({
               </svg>
             </button>
           </div>
-        </div>
+        </div> */}
         <div
           className={`glass rounded-b-2xl overflow-hidden transition-all duration-300 ${
             isExpanded ? "w-80 h-48" : "w-80 h-16"
@@ -165,9 +165,25 @@ export const LocalVideoDisplay: React.FC = () => {
 
   if (!cameraTrackRef.publication?.isSubscribed) {
     return (
-      <div className="w-full h-40 bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-xl flex items-center justify-center border border-slate-600/30 backdrop-blur-sm">
-        <div className="text-center text-slate-400">
-          <div className="w-12 h-12 mx-auto mb-3 bg-slate-500/10 rounded-full flex items-center justify-center">
+      <div 
+        className="w-full h-40 bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-xl flex items-center justify-center border border-slate-600/30 backdrop-blur-sm"
+      >
+        <div 
+          className="text-center text-slate-400"
+          style={{
+            width: "200px",
+          }}
+        >
+          <div
+            className="w-12 h-12 mx-auto mb-3 bg-slate-500/10 rounded-full"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "120px",
+              width: "80px",
+            }}
+          >
             <svg
               className="w-6 h-6 text-slate-400"
               fill="none"
