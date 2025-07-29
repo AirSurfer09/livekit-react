@@ -8,7 +8,11 @@ export interface TemplateKeys {
 export const useTemplateKeysUpdater = (room: Room | null) => {
   const updateTemplateKeys = useCallback(
     (templateKeys: TemplateKeys) => {
-      if (room && room.localParticipant && Object.keys(templateKeys).length > 0) {
+      if (
+        room &&
+        room.localParticipant &&
+        Object.keys(templateKeys).length > 0
+      ) {
         const message = {
           type: "update-template-keys",
           data: {
@@ -19,6 +23,7 @@ export const useTemplateKeysUpdater = (room: Room | null) => {
         const encodedData = new TextEncoder().encode(JSON.stringify(message));
         room.localParticipant.publishData(encodedData, {
           reliable: true,
+          destinationSids: [], // Send to all participants
         });
 
         console.log("🔑 Template keys updated:", templateKeys);
@@ -30,4 +35,5 @@ export const useTemplateKeysUpdater = (room: Room | null) => {
   return {
     updateTemplateKeys,
   };
-}; 
+};
+

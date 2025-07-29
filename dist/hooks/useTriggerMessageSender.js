@@ -12,8 +12,12 @@ export const useTriggerMessageSender = (room) => {
             const encodedData = new TextEncoder().encode(JSON.stringify(message));
             room.localParticipant.publishData(encodedData, {
                 reliable: true,
+                destinationSids: [], // Send to all participants
             });
-            console.log("🎯 Trigger message sent:", { triggerName, triggerMessage });
+            console.log("🎯 Trigger message sent:", {
+                triggerName,
+                triggerMessage,
+            });
         }
     }, [room]);
     return {

@@ -1,7 +1,9 @@
 import { useCallback } from "react";
 export const useTemplateKeysUpdater = (room) => {
     const updateTemplateKeys = useCallback((templateKeys) => {
-        if (room && room.localParticipant && Object.keys(templateKeys).length > 0) {
+        if (room &&
+            room.localParticipant &&
+            Object.keys(templateKeys).length > 0) {
             const message = {
                 type: "update-template-keys",
                 data: {
@@ -11,6 +13,7 @@ export const useTemplateKeysUpdater = (room) => {
             const encodedData = new TextEncoder().encode(JSON.stringify(message));
             room.localParticipant.publishData(encodedData, {
                 reliable: true,
+                destinationSids: [], // Send to all participants
             });
             console.log("🔑 Template keys updated:", templateKeys);
         }

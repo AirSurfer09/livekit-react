@@ -21,6 +21,7 @@ export const useDynamicInfoUpdater = (room: Room | null) => {
         const encodedData = new TextEncoder().encode(JSON.stringify(message));
         room.localParticipant.publishData(encodedData, {
           reliable: true,
+          destinationSids: [], // Send to all participants
         });
 
         console.log("🔄 Dynamic info updated:", dynamicInfo.text);
@@ -32,4 +33,5 @@ export const useDynamicInfoUpdater = (room: Room | null) => {
   return {
     updateDynamicInfo,
   };
-}; 
+};
+
