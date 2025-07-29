@@ -20,24 +20,28 @@ export const useAudioControls = (room) => {
         const handleTrackMuted = (track) => {
             if (track.source === 'microphone') {
                 setIsAudioMuted(true);
+                setIsAudioEnabled(false);
                 logger.log("🔇 Audio muted");
             }
         };
         const handleTrackUnmuted = (track) => {
             if (track.source === 'microphone') {
                 setIsAudioMuted(false);
+                setIsAudioEnabled(true);
                 logger.log("🎤 Audio unmuted");
             }
         };
         const handleTrackEnabled = (track) => {
             if (track.source === 'microphone') {
                 setIsAudioEnabled(true);
+                setIsAudioMuted(false);
                 logger.log("🎤 Audio enabled");
             }
         };
         const handleTrackDisabled = (track) => {
             if (track.source === 'microphone') {
                 setIsAudioEnabled(false);
+                setIsAudioMuted(true);
                 logger.log("🔇 Audio disabled");
             }
         };
@@ -112,13 +116,13 @@ export const useAudioControls = (room) => {
     }, [room]);
     // Toggle audio
     const toggleAudio = useCallback(async () => {
-        if (isAudioEnabled) {
-            await disableAudio();
+        if (isAudioMuted) {
+            await unmuteAudio();
         }
         else {
-            await enableAudio();
+            await muteAudio();
         }
-    }, [isAudioEnabled, enableAudio, disableAudio]);
+    }, [isAudioMuted, muteAudio, unmuteAudio]);
     // Set audio device
     const setAudioDevice = useCallback(async (deviceId) => {
         if (!room) {

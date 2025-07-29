@@ -3,11 +3,8 @@ import { ConvaiClient, ChatMessage } from "../types";
 import {
   RoomContext,
   RoomAudioRenderer,
-  VoiceAssistantControlBar,
-  DisconnectButton,
 } from "@livekit/components-react";
-import { CloseIcon } from "./CloseIcon";
-import { ConvaiLogo } from "./ConvaiLogo";
+import { MicrophoneIcon } from "./MicrophoneIcon";
 
 interface ChatBotProps {
   convaiClient: ConvaiClient & { activity?: string };
@@ -25,7 +22,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { state, activity, chatMessages, sendUserTextMessage } = convaiClient;
+  const { state, activity, chatMessages, sendUserTextMessage, audioControls } = convaiClient;
 
   // Filter messages to only show the specified types in chat UI
   const filteredChatMessages = chatMessages.filter(
@@ -111,14 +108,15 @@ export const ChatBot: React.FC<ChatBotProps> = ({
             }}
           >
             <div
-              className="items-end max-w-[85%]"
+              className="items-end"
               style={{
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "flex-end",
+                maxWidth: "100%",
               }}
             >
-              <div className="transparent border border-emerald-500/30 rounded-2xl px-6 py-4 shadow-lg backdrop-blur-sm">
+              <div className="transparent border border-emerald-500/30 rounded-2xl px-6 py-4 shadow-lg backdrop-blur-sm" style={{padding: "12px 16px"}}>
                 <p className="text-emerald-100 text-sm leading-relaxed">
                   {message.content}
                 </p>
@@ -131,7 +129,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({
                 }}
               >
                 <span className="text-emerald-400/60 text-xs font-medium">
-                  You
+                  You {formatTime(message.timestamp)}
                 </span>
               </div>
             </div>
@@ -147,13 +145,14 @@ export const ChatBot: React.FC<ChatBotProps> = ({
             }}
           >
             <div
-              className="items-start max-w-[85%]"
+              className="items-start"
               style={{
                 display: "flex",
                 flexDirection: "column",
+                maxWidth: "85%",
               }}
             >
-              <div className="bg-emerald-500/20  border border-emerald-500/30 rounded-2xl px-6 py-4 shadow-lg backdrop-blur-sm">
+              <div className="bg-emerald-500/20  border border-emerald-500/30 rounded-2xl px-6 py-4 shadow-lg backdrop-blur-sm" style={{padding: "12px 16px"}}>
                 <p className="text-slate-100 text-sm leading-relaxed">
                   {message.content}
                 </p>
@@ -166,7 +165,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({
                 }}
               >
                 <span className="text-slate-400/60 text-xs font-medium">
-                  Convai
+                  Convai {formatTime(message.timestamp)}
                 </span>
               </div>
             </div>
@@ -209,7 +208,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({
 
   return (
     <RoomContext.Provider value={convaiClient.room}>
-      <div className="relative rounded-4xl glass" style={{}}>
+      <div className="relative rounded-4xl glass" style={{width: "40vw",maxWidth: "550px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
         {/* Header */}
         <div className="rounded-t-2xl flex items-center justify-around">
         </div>
@@ -224,6 +223,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
+            width: "100%",
           }}
         >
           {!isMinimized && (
@@ -294,8 +294,23 @@ export const ChatBot: React.FC<ChatBotProps> = ({
                       width: "100%",
                       display: "flex",
                       justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: "8px",
                     }}
                   >
+                    {/* Microphone Button */}
+                    <button
+                      onClick={() => audioControls.toggleAudio()}
+                      className={`px-3 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 text-white ${
+                        audioControls.isAudioMuted
+                          ? "bg-red-500/20 border border-red-500/30 hover:bg-red-500/30"
+                          : "bg-emerald-500/20 border border-emerald-500/30 hover:bg-emerald-500/30"
+                      }`}
+                      title={audioControls.isAudioMuted ? "Unmute Microphone" : "Mute Microphone"}
+                    >
+                      <MicrophoneIcon width={24} height={24} />
+                    </button>
+
                     <input
                       ref={inputRef}
                       type="text"
@@ -304,11 +319,11 @@ export const ChatBot: React.FC<ChatBotProps> = ({
                       onKeyPress={handleKeyPress}
                       placeholder="Type your message..."
                       disabled={isSending}
-                      className="px-4 py-3 rounded-lg"
+                      className="px-4 py-3 rounded-lg flex-1"
                       style={{
-                        minWidth: "75%",
                         color: "black",
                         outline: "none",
+                        flex: 1,
                       }}
                     />
                     <button

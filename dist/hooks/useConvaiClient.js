@@ -135,7 +135,6 @@ export const useConvaiClient = () => {
             await room.disconnect();
             setIsConnected(false);
             setActivity("Disconnected");
-            // Clear chat messages on disconnect
             setChatMessages([]);
         }
     }, [room]);

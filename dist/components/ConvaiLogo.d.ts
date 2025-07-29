@@ -1,4 +1,4 @@
 export declare function ConvaiLogo({ width, height }: {
-    width: string;
-    height: string;
+    width: number;
+    height: number;
 }): import("react/jsx-runtime").JSX.Element;

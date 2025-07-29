@@ -1,4 +1,4 @@
-export function ConvaiLogo({width, height}: {width: string, height: string}) {
+export function ConvaiLogo({width, height}: {width: number, height: number}) {
     return (
       <svg
       width={width}

@@ -182,6 +182,29 @@ export default function App() {
                 >
                   Update Dynamic Info
                 </button>
+
+                {/* Video Controls */}
+                <button
+                  onClick={() => convaiClient.videoControls.hideVideo()}
+                  className="px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg text-red-300 hover:bg-red-500/30 transition-colors text-sm"
+                >
+                  Hide Video
+                </button>
+
+                <button
+                  onClick={() => convaiClient.videoControls.showVideo()}
+                  className="px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-500/30 transition-colors text-sm"
+                >
+                  Show Video
+                </button>
+
+                {/* Disconnect Button */}
+                <button
+                  onClick={() => convaiClient.disconnect()}
+                  className="px-4 py-2 bg-slate-500/20 border border-slate-500/30 rounded-lg text-slate-300 hover:bg-slate-500/30 transition-colors text-sm"
+                >
+                  Disconnect
+                </button>
               </div>
             </motion.div>
           )}
