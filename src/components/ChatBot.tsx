@@ -27,10 +27,11 @@ export const ChatBot: React.FC<ChatBotProps> = ({
   const { state, activity, chatMessages, sendUserTextMessage } = convaiClient;
 
   // Filter messages to only show the specified types in chat UI
-  const filteredChatMessages = chatMessages.filter(message => 
-    message.type === 'user-llm-text' || 
-    message.type === 'bot-llm-text' || 
-    message.type === 'bot-emotion'
+  const filteredChatMessages = chatMessages.filter(
+    (message) =>
+      message.type === "user-llm-text" ||
+      message.type === "bot-llm-text" ||
+      message.type === "bot-emotion",
   );
 
   // Auto-scroll to bottom when new messages arrive
@@ -105,27 +106,27 @@ export const ChatBot: React.FC<ChatBotProps> = ({
           <div
             key={message.id}
             style={{
-              padding: '8px 0',
+              padding: "8px 0",
             }}
           >
-            <div 
+            <div
               className="items-end max-w-[85%]"
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end'
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-end",
               }}
             >
-              <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30 rounded-2xl px-6 py-4 shadow-lg backdrop-blur-sm">
+              <div className="transparent border border-emerald-500/30 rounded-2xl px-6 py-4 shadow-lg backdrop-blur-sm">
                 <p className="text-emerald-100 text-sm leading-relaxed">
                   {message.content}
                 </p>
               </div>
-              <div 
+              <div
                 className="flex items-center mt-2 space-x-2"
                 style={{
-                  marginRight: '12px',
-                  marginTop: '4px'
+                  marginRight: "12px",
+                  marginTop: "4px",
                 }}
               >
                 <span className="text-emerald-400/60 text-xs font-medium">
@@ -141,17 +142,17 @@ export const ChatBot: React.FC<ChatBotProps> = ({
           <div
             key={message.id}
             style={{
-              padding: '8px 0',
+              padding: "8px 0",
             }}
           >
-            <div 
+            <div
               className="items-start max-w-[85%]"
               style={{
-                display: 'flex',
-                flexDirection: 'column'
+                display: "flex",
+                flexDirection: "column",
               }}
             >
-              <div className="bg-gradient-to-br from-slate-700/40 to-slate-800/40 border border-slate-600/30 rounded-2xl px-6 py-4 shadow-lg backdrop-blur-sm">
+              <div className="bg-emerald-500/20  border border-emerald-500/30 rounded-2xl px-6 py-4 shadow-lg backdrop-blur-sm">
                 <p className="text-slate-100 text-sm leading-relaxed">
                   {message.content}
                 </p>
@@ -159,12 +160,12 @@ export const ChatBot: React.FC<ChatBotProps> = ({
               <div
                 className="flex items-center mt-2 space-x-2"
                 style={{
-                  marginLeft: '12px',
-                  marginTop: '4px'
+                  marginLeft: "12px",
+                  marginTop: "4px",
                 }}
               >
                 <span className="text-slate-400/60 text-xs font-medium">
-                  Assistant
+                  Convai
                 </span>
               </div>
             </div>
@@ -207,14 +208,10 @@ export const ChatBot: React.FC<ChatBotProps> = ({
 
   return (
     <RoomContext.Provider value={convaiClient.room}>
-      <div className="relative rounded-4xl glass"
-        style={{
-          
-        }}
-      >
+      <div className="relative rounded-4xl glass" style={{}}>
         {/* Header */}
         <div className="rounded-t-2xl flex items-center justify-around">
-            {/* <div 
+          {/* <div 
             className="flex items-center justify-between"
             >
               <div className="flex flex-col justify-around items-center space-x-1">
@@ -231,7 +228,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({
                 </div>
               )}
             </div> */}
-            {/* <button
+          {/* <button
               onClick={() => setIsMinimized(!isMinimized)}
               className="p-2 hover:bg-emerald-500/20 rounded-xl transition-all duration-200 text-slate-300 hover:text-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 btn-hover-lift"
             >
@@ -258,9 +255,9 @@ export const ChatBot: React.FC<ChatBotProps> = ({
           }`}
           style={{
             minHeight: 190,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between'
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
           }}
         >
           {!isMinimized && (
@@ -270,15 +267,16 @@ export const ChatBot: React.FC<ChatBotProps> = ({
                 ref={chatContainerRef}
                 className="flex-1 overflow-y-auto p-4 space-y-2 bg-slate-900/20 h-[320px] scrollbar-thin scrollbar-thumb-emerald-500/30 scrollbar-track-transparent"
                 style={{
-                  maxHeight: '500px',
-                  overflowY: 'scroll'
+                  maxHeight: "500px",
+                  overflowY: "scroll",
                 }}
               >
                 {chatMessages.length === 0 ? (
                   <div className="flex items-center justify-center h-full">
-                    <div className="text-center text-slate-400"
+                    <div
+                      className="text-center text-slate-400"
                       style={{
-                        paddingTop: '20px'
+                        paddingTop: "20px",
                       }}
                     >
                       {/* <div className="w-full h-16 mx-auto mb-4 rounded-2xl text-center">
@@ -346,8 +344,8 @@ export const ChatBot: React.FC<ChatBotProps> = ({
                 ) : (
                   <div
                     style={{
-                      height: '400px !important',
-                      overflowY: 'scroll'
+                      height: "400px !important",
+                      overflowY: "scroll",
                     }}
                   >
                     {filteredChatMessages.map((message, index) =>
@@ -453,11 +451,11 @@ export const ChatBot: React.FC<ChatBotProps> = ({
                     )}
                   </button>
                 ) : (
-                  <div 
+                  <div
                     style={{
-                      width: '100%',  
-                      display: 'flex',
-                      justifyContent: 'space-between',
+                      width: "100%",
+                      display: "flex",
+                      justifyContent: "space-between",
                     }}
                   >
                     <input
@@ -470,9 +468,9 @@ export const ChatBot: React.FC<ChatBotProps> = ({
                       disabled={isSending}
                       className="px-4 py-3 rounded-lg"
                       style={{
-                        minWidth: '75%',
-                        color: 'black',
-                        outline: 'none',
+                        minWidth: "75%",
+                        color: "black",
+                        outline: "none",
                       }}
                     />
                     <button

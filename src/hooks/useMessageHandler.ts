@@ -64,6 +64,15 @@ export const useMessageHandler = (
 
           // Bot LLM Text Messages
           case "bot-llm-text":
+            logger.log(
+              "%c🔍 DEBUG BOT-LLM-TEXT%c",
+              "background: #ff9800; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold;",
+              {
+                hasData: !!messageData.data,
+                dataKeys: messageData.data ? Object.keys(messageData.data) : [],
+                fullMessage: messageData,
+              },
+            );
             if (messageData.data?.text) {
               const convaiMessage: ChatMessage = {
                 id: messageId,
@@ -74,7 +83,6 @@ export const useMessageHandler = (
               setChatMessages((prev) => [...prev, convaiMessage]);
               logger.log(
                 "%c🤖 CONVAI MESSAGE%c %c" + messageData.data.text,
-                messageData,
                 "background: #45b7d1; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold;",
                 "color: #45b7d1; font-weight: bold;",
                 "color: #f7f1e3;",
@@ -304,4 +312,3 @@ export const useMessageHandler = (
     setupMessageListener,
   };
 };
-
