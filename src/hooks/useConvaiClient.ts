@@ -11,6 +11,8 @@ import { useTriggerMessageSender } from "./useTriggerMessageSender";
 import { useTemplateKeysUpdater } from "./useTemplateKeysUpdater";
 import { useDynamicInfoUpdater } from "./useDynamicInfoUpdater";
 import { useMessageHandler } from "./useMessageHandler";
+import { useAudioControls } from "./useAudioControls";
+import { useVideoControls } from "./useVideoControls";
 import { logger } from "../utils/logger";
 
 const DEFAULT_CORE_SERVICE_URL = "https://realtime-api.convai.com";
@@ -34,6 +36,10 @@ export const useConvaiClient = (): ConvaiClient & {
 
   // Initialize message handler
   const { setupMessageListener } = useMessageHandler(room, setChatMessages);
+
+  // Initialize media controls
+  const audioControls = useAudioControls(room);
+  const videoControls = useVideoControls(room);
 
   // Data message listener effect
   useEffect(() => {
@@ -207,6 +213,8 @@ export const useConvaiClient = (): ConvaiClient & {
     updateDynamicInfo,
     activity,
     chatMessages,
+    audioControls,
+    videoControls,
   };
 };
 

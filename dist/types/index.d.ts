@@ -33,6 +33,8 @@ export interface ConvaiClientState {
     isSpeaking: boolean;
     agentState: 'disconnected' | 'connected' | 'listening' | 'thinking' | 'speaking';
 }
+import { AudioControls } from "../hooks/useAudioControls";
+import { VideoControls } from "../hooks/useVideoControls";
 export interface ConvaiClient {
     state: ConvaiClientState;
     connect: (config: ConvaiConfig) => Promise<void>;
@@ -51,4 +53,6 @@ export interface ConvaiClient {
         text: string;
     }) => void;
     chatMessages: ChatMessage[];
+    audioControls: AudioControls;
+    videoControls: VideoControls;
 }
