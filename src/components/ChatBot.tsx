@@ -19,9 +19,12 @@ export const ChatBot: React.FC<ChatBotProps> = ({
 }) => {
   const [isMinimized, setIsMinimized] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [inputText, setInputText] = useState('');
+  const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const { state, activity, chatMessages } = convaiClient;
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { state, activity, chatMessages, sendTextMessage } = convaiClient;
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -62,6 +65,27 @@ export const ChatBot: React.FC<ChatBotProps> = ({
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const handleSendMessage = async () => {
+    if (!inputText.trim() || isSending || !state.isConnected) return;
+    
+    setIsSending(true);
+    try {
+      sendTextMessage(inputText);
+      setInputText('');
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
   };
 
   const renderMessage = (message: ChatMessage, index: number) => {
@@ -216,7 +240,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({
               {/* Messages Area */}
               <div
                 ref={chatContainerRef}
-                className="flex-1 overflow-y-auto p-4 space-y-2 bg-slate-900/20 h-[380px] scrollbar-thin scrollbar-thumb-emerald-500/30 scrollbar-track-transparent"
+                className="flex-1 overflow-y-auto p-4 space-y-2 bg-slate-900/20 h-[320px] scrollbar-thin scrollbar-thumb-emerald-500/30 scrollbar-track-transparent"
               >
                 {chatMessages.length === 0 ? (
                   <div className="flex items-center justify-center h-full">
@@ -388,7 +412,41 @@ export const ChatBot: React.FC<ChatBotProps> = ({
                     )}
                   </button>
                 ) : (
-                  <></>
+                  <div className="flex space-x-2">
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={inputText}
+                      onChange={(e) => setInputText(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Type your message..."
+                      disabled={isSending}
+                      className="flex-1 px-4 py-3 bg-slate-800/50 border border-emerald-500/30 rounded-xl text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-200 backdrop-blur-sm"
+                    />
+                    <button
+                      onClick={handleSendMessage}
+                      disabled={!inputText.trim() || isSending}
+                      className="px-4 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:from-emerald-500/30 disabled:to-emerald-600/30 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-emerald-500/25 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2 focus:ring-offset-slate-900 btn-hover-lift disabled:cursor-not-allowed"
+                    >
+                      {isSending ? (
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      ) : (
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                          />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 )}
               </div>
             </>

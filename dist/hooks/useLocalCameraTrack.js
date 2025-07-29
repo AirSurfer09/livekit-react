@@ -1,7 +1,7 @@
-import { useLocalParticipant } from "@livekit/components-react";
+import { useLocalParticipant, } from "@livekit/components-react";
 import { Track } from "livekit-client";
 import { useMemo } from "react";
-export function useLocalCameraTrack() {
+export const useLocalCameraTrack = () => {
     const { cameraTrack, localParticipant } = useLocalParticipant();
     const cameraTrackRef = useMemo(() => {
         return {
@@ -11,4 +11,4 @@ export function useLocalCameraTrack() {
         };
     }, [localParticipant, cameraTrack]);
     return cameraTrackRef;
-}
+};

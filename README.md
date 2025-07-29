@@ -45,12 +45,27 @@ function MyComponent() {
           <button onClick={convaiClient.disconnect}>Disconnect</button>
           
           {/* Display chat messages */}
-          {convaiClient.messages.map((message, index) => (
-            <div key={index}>
-              {message.user && <p>User: {message.user}</p>}
-              {message.convai && <p>Assistant: {message.convai}</p>}
+          {convaiClient.chatMessages.map((message, index) => (
+            <div key={message.id}>
+              {message.type === 'user' && <p>User: {message.content}</p>}
+              {message.type === 'convai' && <p>Assistant: {message.content}</p>}
             </div>
           ))}
+          
+          {/* Text input for sending messages */}
+          <div>
+            <input 
+              type="text" 
+              placeholder="Type your message..."
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  const input = e.target as HTMLInputElement;
+                  convaiClient.sendTextMessage(input.value);
+                  input.value = '';
+                }
+              }}
+            />
+          </div>
         </div>
       )}
     </div>
@@ -87,13 +102,43 @@ The `useConvaiClient` hook returns a client object with:
 - `connect(config)`: Connect to a character
 - `disconnect()`: Disconnect from the current session
 - `sendRTVI(triggerName, message?)`: Send RTVI trigger
+- `sendTextMessage(text)`: Send a text message to the AI assistant
 
 ### Data
+- `chatMessages`: Array of chat messages with structure `{id: string, type: 'user' | 'convai' | 'emotion' | 'behavior-tree', content: string, timestamp: string}`
 - `messages`: Array of chat messages in format `{user?: string, convai?: string, timestamp: number, role: string}`
 - `transcriptions`: Raw transcription segments
 - `room`: LiveKit room instance
 - `videoTrack`: Video track reference
 - `audioTrack`: Audio track reference
+
+## Components
+
+### ChatBot Component
+
+The `ChatBot` component provides a complete chat interface with text input:
+
+```tsx
+import { ChatBot } from 'airsurfer-livekit-react';
+
+function MyApp() {
+  const convaiClient = useConvaiClient();
+  
+  return (
+    <ChatBot
+      convaiClient={convaiClient}
+      onConnect={() => convaiClient.connect(config)}
+    />
+  );
+}
+```
+
+The ChatBot component includes:
+- Real-time message display
+- Text input for sending messages
+- Connection status indicator
+- Minimizable interface
+- Typing indicators
 
 ## Advanced Usage
 

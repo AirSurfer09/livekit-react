@@ -19,43 +19,6 @@ export interface ConvaiConfig {
         currentAttentionObject?: string;
     };
 }
-export interface RoomState {
-    isConnected: boolean;
-    participants: any[];
-}
-export interface ConnectionData {
-    room_url: string;
-    token: string;
-    room_name: string;
-    session_id: string;
-}
-export interface RTVIMessage {
-    type: string;
-    data: any;
-}
-export interface TriggerPayload {
-    trigger_name?: string;
-    trigger_message?: string;
-}
-export interface TranscriptionSegment {
-    id: string;
-    text: string;
-    role: 'user' | 'assistant';
-    firstReceivedTime: number;
-}
-export interface DataMessage {
-    type: string;
-    data: any;
-    timestamp: string;
-    participantId?: string;
-    participantSid?: string;
-}
-export type AgentState = 'disconnected' | 'connecting' | 'listening' | 'thinking' | 'speaking' | 'initializing';
-export interface VideoTrackRef {
-    participant: any;
-    source: any;
-    publication: any;
-}
 export interface ChatMessage {
     id: string;
     type: 'user' | 'convai' | 'emotion' | 'behavior-tree';
@@ -80,5 +43,6 @@ export interface ConvaiClient {
     videoTrack: any;
     audioTrack: any;
     sendRTVI: (triggerName: string, message?: string) => void;
+    sendTextMessage: (text: string) => void;
     chatMessages: ChatMessage[];
 }

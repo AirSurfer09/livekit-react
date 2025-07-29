@@ -1,8 +1,11 @@
-import { TrackReferenceOrPlaceholder, useLocalParticipant } from "@livekit/components-react";
+import {
+  TrackReferenceOrPlaceholder,
+  useLocalParticipant,
+} from "@livekit/components-react";
 import { Track } from "livekit-client";
 import { useMemo } from "react";
 
-export function useLocalCameraTrack(): TrackReferenceOrPlaceholder {
+export const useLocalCameraTrack = () => {
   const { cameraTrack, localParticipant } = useLocalParticipant();
 
   const cameraTrackRef: TrackReferenceOrPlaceholder = useMemo(() => {
@@ -14,4 +17,4 @@ export function useLocalCameraTrack(): TrackReferenceOrPlaceholder {
   }, [localParticipant, cameraTrack]);
 
   return cameraTrackRef;
-} 
+};
