@@ -5,6 +5,7 @@ import { useTriggerMessageSender } from "./useTriggerMessageSender";
 import { useTemplateKeysUpdater } from "./useTemplateKeysUpdater";
 import { useDynamicInfoUpdater } from "./useDynamicInfoUpdater";
 import { useMessageHandler } from "./useMessageHandler";
+import { logger } from "../utils/logger";
 const DEFAULT_CORE_SERVICE_URL = "https://realtime-api.convai.com";
 export const useConvaiClient = () => {
     const [room] = useState(new Room());
@@ -12,11 +13,12 @@ export const useConvaiClient = () => {
     const [isConnecting, setIsConnecting] = useState(false);
     const [activity, setActivity] = useState("Idle");
     const [chatMessages, setChatMessages] = useState([]);
+    const [participantSid, setParticipantSid] = useState("");
     // Initialize message sender hooks
-    const { sendUserTextMessage } = useUserTextMessageSender(room);
-    const { sendTriggerMessage } = useTriggerMessageSender(room);
-    const { updateTemplateKeys } = useTemplateKeysUpdater(room);
-    const { updateDynamicInfo } = useDynamicInfoUpdater(room);
+    const { sendUserTextMessage } = useUserTextMessageSender(room, participantSid);
+    const { sendTriggerMessage } = useTriggerMessageSender(room, participantSid);
+    const { updateTemplateKeys } = useTemplateKeysUpdater(room, participantSid);
+    const { updateDynamicInfo } = useDynamicInfoUpdater(room, participantSid);
     // Initialize message handler
     const { setupMessageListener } = useMessageHandler(room, setChatMessages);
     // Data message listener effect
@@ -49,7 +51,7 @@ export const useConvaiClient = () => {
                 llm_provider: config.llmProvider || "gemini-baml",
                 ...(config.actionConfig && { action_config: config.actionConfig }),
             };
-            console.log("Connecting to Convai with config:", {
+            logger.log("Connecting to Convai with config:", {
                 url: config.url || DEFAULT_CORE_SERVICE_URL,
                 characterId: config.characterId,
                 llmProvider: config.llmProvider || "gemini-baml",
@@ -66,7 +68,7 @@ export const useConvaiClient = () => {
             });
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error("API Error Response:", {
+                logger.error("API Error Response:", {
                     status: response.status,
                     statusText: response.statusText,
                     body: errorText,
@@ -90,7 +92,7 @@ export const useConvaiClient = () => {
                 throw new Error(errorMessage);
             }
             const connectionData = await response.json();
-            console.log("Connection data received:", connectionData);
+            logger.log("Connection data received:", connectionData);
             // Connect to LiveKit room
             await room.connect(connectionData.room_url, connectionData.token, {
                 rtcConfig: {
@@ -104,13 +106,16 @@ export const useConvaiClient = () => {
             if (config.enableVideo !== false) {
                 await room.localParticipant.setCameraEnabled(true);
             }
+            // Capture participant SID
+            setParticipantSid(room.localParticipant.sid);
             setIsConnected(true);
             setActivity("Connected");
-            console.log("Connected to room:", connectionData.room_name);
-            console.log("Session ID:", connectionData.session_id);
+            logger.log("Connected to room:", connectionData.room_name);
+            logger.log("Session ID:", connectionData.session_id);
+            logger.log("Participant SID:", room.localParticipant.sid);
         }
         catch (error) {
-            console.error("Connection failed:", error);
+            logger.error("Connection failed:", error);
             setIsConnected(false);
             setActivity("Connection failed");
             throw error;

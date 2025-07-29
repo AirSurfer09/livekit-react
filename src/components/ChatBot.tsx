@@ -26,6 +26,13 @@ export const ChatBot: React.FC<ChatBotProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const { state, activity, chatMessages, sendUserTextMessage } = convaiClient;
 
+  // Filter messages to only show the specified types in chat UI
+  const filteredChatMessages = chatMessages.filter(message => 
+    message.type === 'user-llm-text' || 
+    message.type === 'bot-llm-text' || 
+    message.type === 'bot-emotion'
+  );
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -34,19 +41,19 @@ export const ChatBot: React.FC<ChatBotProps> = ({
         block: "end",
       });
     }
-  }, [chatMessages]);
+  }, [filteredChatMessages]);
 
   // Simulate typing indicator for Convai messages
   useEffect(() => {
-    if (chatMessages.length > 0) {
-      const lastMessage = chatMessages[chatMessages.length - 1];
-      if (lastMessage.type === "convai") {
+    if (filteredChatMessages.length > 0) {
+      const lastMessage = filteredChatMessages[filteredChatMessages.length - 1];
+      if (lastMessage.type === "bot-llm-text") {
         setIsTyping(true);
         const timer = setTimeout(() => setIsTyping(false), 1000);
         return () => clearTimeout(timer);
       }
     }
-  }, [chatMessages]);
+  }, [filteredChatMessages]);
 
   const getStatusColor = () => {
     if (state.isConnected) return "bg-emerald-400 shadow-emerald-400/50";
@@ -90,14 +97,13 @@ export const ChatBot: React.FC<ChatBotProps> = ({
   };
 
   const renderMessage = (message: ChatMessage, index: number) => {
-    const isLastMessage = index === chatMessages.length - 1;
+    const isLastMessage = index === filteredChatMessages.length - 1;
 
     switch (message.type) {
-      case "user":
+      case "user-llm-text":
         return (
           <div
             key={message.id}
-            // className="flex justify-end mb-6 animate-in slide-in-from-right-2 duration-300"
             style={{
               padding: '8px 0',
             }}
@@ -125,19 +131,15 @@ export const ChatBot: React.FC<ChatBotProps> = ({
                 <span className="text-emerald-400/60 text-xs font-medium">
                   You
                 </span>
-                {/* <span className="text-emerald-400/40 text-xs">
-                  {formatTime(message.timestamp)}
-                </span> */}
               </div>
             </div>
           </div>
         );
 
-      case "convai":
+      case "bot-llm-text":
         return (
           <div
             key={message.id}
-            // className=" mb-6 animate-in slide-in-from-left-2 duration-300"
             style={{
               padding: '8px 0',
             }}
@@ -161,47 +163,35 @@ export const ChatBot: React.FC<ChatBotProps> = ({
                   marginTop: '4px'
                 }}
               >
-                {/* <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div> */}
                 <span className="text-slate-400/60 text-xs font-medium">
                   Assistant
                 </span>
-                {/* <span className="text-emerald-400/40 text-xs">
-                  {formatTime(message.timestamp)}
-                </span> */}
               </div>
             </div>
           </div>
         );
 
-      case "emotion":
+      case "bot-emotion":
         return (
-          <></>
-          // <div
-          //   key={message.id}
-          //   className="flex justify-center mb-4 animate-in fade-in duration-500"
-          // >
-          //   <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full px-4 py-2 shadow-lg backdrop-blur-sm">
-          //     <p className="text-purple-200 text-sm font-medium">
-          //       😊 {message.content}
-          //     </p>
-          //   </div>
-          // </div>
+          <div
+            key={message.id}
+            className="flex justify-center mb-4 animate-in fade-in duration-500"
+          >
+            <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full px-4 py-2 shadow-lg backdrop-blur-sm">
+              <p className="text-purple-200 text-sm font-medium">
+                😊 {message.content}
+              </p>
+            </div>
+          </div>
         );
 
+      // Legacy message types - these won't be shown in filtered view but handle them gracefully
+      case "user":
+      case "convai":
+      case "emotion":
       case "behavior-tree":
-        return (
-          <></>
-          // <div
-          //   key={message.id}
-          //   className="flex justify-center mb-4 animate-in fade-in duration-500"
-          // >
-          //   <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-full px-4 py-2 shadow-lg backdrop-blur-sm">
-          //     <p className="text-blue-200 text-sm font-medium">
-          //       🌳 {message.content}
-          //     </p>
-          //   </div>
-          // </div>
-        );
+      case "action":
+        return null;
 
       default:
         return null;
@@ -360,7 +350,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({
                       overflowY: 'scroll'
                     }}
                   >
-                    {chatMessages.map((message, index) =>
+                    {filteredChatMessages.map((message, index) =>
                       renderMessage(message, index),
                     )}
 

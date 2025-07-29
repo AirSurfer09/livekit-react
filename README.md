@@ -1,158 +1,159 @@
 # Airsurfer LiveKit React
 
-A React package for integrating Convai's AI-powered voice assistants with LiveKit for real-time audio/video conversations.
+A React package for integrating Convai's AI-powered voice assistants to web for real-time audio/video conversations.
 
-## Quick Start
+## Features
+
+- 🎤 Real-time voice conversations with AI assistants
+- 📹 Video streaming support
+- 💬 Chat interface with message history
+- 🎯 Trigger message support
+- 🔑 Template keys management
+- 🔄 Dynamic info updates
+- 🎭 Action responses
+- 🌳 Behavior tree responses
+- 🛡️ Moderation responses
+
+## Installation
+
+```bash
+npm install airsurfer-livekit-react
+```
+
+## Environment Configuration
+
+### Development Logging
+
+To enable detailed logging in development mode, create a `.env` file in your project root:
+
+```bash
+# Copy the example environment file
+cp env.example .env
+```
+
+The `.env` file should contain:
+```env
+NODE_ENV=development
+REACT_APP_ENV=development
+```
+
+### Logging Levels
+
+- **Development Mode**: All colored console logs are displayed
+- **Production Mode**: No console logs are displayed (clean production builds)
+
+## Usage
+
+### Basic Setup
 
 ```tsx
-import { useConvaiClient } from 'airsurfer-livekit-react';
+import { useConvaiClient, ChatBot } from 'airsurfer-livekit-react';
 
-function MyComponent() {
+function App() {
   const convaiClient = useConvaiClient();
 
-  const startConversation = async () => {
-    try {
-      await convaiClient.connect({
-        apiKey: 'your-api-key',
-        characterId: 'your-character-id',
-        enableVideo: true,
-        enableAudio: true,
-        llmProvider: 'gemini-baml', // optional, defaults to gemini-baml
-        actionConfig: {
-          actions: ['Wave', 'Point'],
-          characters: [
-            { name: 'Assistant', bio: 'A helpful AI assistant' },
-            { name: 'User', bio: 'The user' }
-          ],
-          objects: [
-            { name: 'Coffee Cup', description: 'A coffee cup' }
-          ],
-          currentAttentionObject: 'Coffee Cup'
-        }
-      });
-    } catch (error) {
-      console.error('Connection failed:', error);
-    }
+  const connect = async () => {
+    await convaiClient.connect({
+      apiKey: 'your-api-key',
+      characterId: 'your-character-id',
+      enableVideo: true,
+      enableAudio: true,
+    });
   };
 
   return (
     <div>
-      {!convaiClient.state.isConnected ? (
-        <button onClick={startConversation}>Start Conversation</button>
-      ) : (
-        <div>
-          <p>Status: {convaiClient.state.agentState}</p>
-          <button onClick={convaiClient.disconnect}>Disconnect</button>
-          
-          {/* Display chat messages */}
-          {convaiClient.chatMessages.map((message, index) => (
-            <div key={message.id}>
-              {message.type === 'user' && <p>User: {message.content}</p>}
-              {message.type === 'convai' && <p>Assistant: {message.content}</p>}
-            </div>
-          ))}
-          
-          {/* Text input for sending messages */}
-          <div>
-            <input 
-              type="text" 
-              placeholder="Type your message..."
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  const input = e.target as HTMLInputElement;
-                  convaiClient.sendTextMessage(input.value);
-                  input.value = '';
-                }
-              }}
-            />
-          </div>
-        </div>
-      )}
+      <ChatBot convaiClient={convaiClient} onConnect={connect} />
     </div>
   );
 }
 ```
 
-## Configuration
+### Message Types
 
-### Required Fields
-- `apiKey`: Your Convai API key
-- `characterId`: The ID of the character to connect to
+The library handles various message types:
 
-### Optional Fields
-- `enableVideo`: Enable video (default: true)
-- `enableAudio`: Enable audio (default: true)
-- `url`: Custom core service URL (default: https://realtime-api.convai.com)
-- `llmProvider`: LLM provider (default: gemini-baml)
-- `actionConfig`: Configuration for RTVI actions and objects
+#### User Messages (Chat UI)
+- **🎤 User Transcriptions**: Speech-to-text transcriptions (shown in chat)
+- **🚫 User Text Messages**: Programmatic text messages (sent to Convai, not shown in chat)
 
-## Client Interface
+#### Assistant Messages (Chat UI)
+- **🤖 Convai Messages**: Assistant responses
+- **😊 Convai Emotions**: Bot emotion states
 
-The `useConvaiClient` hook returns a client object with:
+#### System Messages (Client Access Only)
+- **🎭 Action Responses**: Character actions
+- **🌳 Behavior Tree Responses**: Narrative responses
+- **🛡️ Moderation Responses**: Content moderation
+- **🎯 Trigger Messages**: System triggers
+- **🔑 Template Keys**: Template updates
+- **🔄 Dynamic Info**: Dynamic information updates
 
-### State
-- `state.isConnected`: Connection status
-- `state.isConnecting`: Connecting status
-- `state.agentState`: Current agent state (disconnected, connecting, listening, thinking, speaking)
-- `state.isListening`: Whether the agent is listening
-- `state.isThinking`: Whether the agent is thinking
-- `state.isSpeaking`: Whether the agent is speaking
+### API Reference
 
-### Methods
-- `connect(config)`: Connect to a character
-- `disconnect()`: Disconnect from the current session
-- `sendRTVI(triggerName, message?)`: Send RTVI trigger
-- `sendTextMessage(text)`: Send a text message to the AI assistant
+#### useConvaiClient()
 
-### Data
-- `chatMessages`: Array of chat messages with structure `{id: string, type: 'user' | 'convai' | 'emotion' | 'behavior-tree', content: string, timestamp: string}`
-- `messages`: Array of chat messages in format `{user?: string, convai?: string, timestamp: number, role: string}`
-- `transcriptions`: Raw transcription segments
-- `room`: LiveKit room instance
-- `videoTrack`: Video track reference
-- `audioTrack`: Audio track reference
-
-## Components
-
-### ChatBot Component
-
-The `ChatBot` component provides a complete chat interface with text input:
+Returns a Convai client with the following methods:
 
 ```tsx
-import { ChatBot } from 'airsurfer-livekit-react';
+const {
+  state,                    // Connection state
+  connect,                  // Connect to Convai
+  disconnect,               // Disconnect from Convai
+  room,                     // LiveKit room instance
+  sendUserTextMessage,      // Send text message (not shown in chat)
+  sendTriggerMessage,       // Send trigger message
+  updateTemplateKeys,       // Update template keys
+  updateDynamicInfo,        // Update dynamic info
+  activity,                 // Current activity status
+  chatMessages,             // Chat message history
+} = useConvaiClient();
+```
 
-function MyApp() {
-  const convaiClient = useConvaiClient();
-  
-  return (
-    <ChatBot
-      convaiClient={convaiClient}
-      onConnect={() => convaiClient.connect(config)}
-    />
-  );
+#### Configuration Options
+
+```tsx
+interface ConvaiConfig {
+  apiKey: string;                    // Required: Your Convai API key
+  characterId: string;               // Required: Character ID
+  url?: string;                      // Optional: Custom API URL
+  enableVideo?: boolean;             // Optional: Enable video (default: true)
+  enableAudio?: boolean;             // Optional: Enable audio (default: true)
+  llmProvider?: string;              // Optional: LLM provider (default: "gemini-baml")
+  actionConfig?: ActionConfig;       // Optional: Action configuration
 }
 ```
 
-The ChatBot component includes:
-- Real-time message display
-- Text input for sending messages
-- Connection status indicator
-- Minimizable interface
-- Typing indicators
+## Development
 
-## Advanced Usage
+### Logging
 
-For advanced usage, you can also import individual components and hooks:
+In development mode, you'll see colored console logs for:
 
-```tsx
-import { 
-  TranscriptionView, 
-  LocalVideoDisplay, 
-  VideoControls,
-  RTVITriggerControls 
-} from 'airsurfer-livekit-react';
+- 📨 **Incoming Messages**: All received messages
+- 💬 **User Messages**: Text messages sent
+- 🎤 **User Transcriptions**: Speech transcriptions
+- 🤖 **Convai Messages**: Assistant responses
+- 😊 **Convai Emotions**: Bot emotions
+- 🎭 **Action Responses**: Character actions
+- 🌳 **Behavior Tree**: Narrative responses
+- 🛡️ **Moderation**: Content moderation
+- 🚫 **Skipped Messages**: Duplicate prevention
+- 🔍 **Unhandled Types**: Unknown message types
+
+### Building
+
+```bash
+# Install dependencies
+npm install
+
+# Build the package
+npm run build
+
+# Run tests
+npm test
 ```
 
-## Examples
+## License
 
-See the `examples/react` directory for a complete working example. 
+MIT 

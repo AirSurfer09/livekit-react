@@ -118,32 +118,6 @@ export const FloatingVideoDisplay: React.FC<FloatingVideoDisplayProps> = ({
   return (
     <RoomContext.Provider value={room}>
       <div className="relative" >
-        {/* <div className="glass-light rounded-t-2xl px-4 py-3 mb-2 border-b border-emerald-500/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse shadow-lg"></div>
-              <span className="text-slate-300 text-sm font-medium">Video</span>
-            </div>
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="p-2 hover:bg-emerald-500/20 rounded-xl transition-all duration-200 text-slate-300 hover:text-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 btn-hover-lift"
-            >
-              <svg
-                className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-          </div>
-        </div> */}
         <div
           className={`glass rounded-b-2xl overflow-hidden transition-all duration-300 ${
             isExpanded ? "w-80 h-48" : "w-80 h-16"

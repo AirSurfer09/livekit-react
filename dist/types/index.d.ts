@@ -21,7 +21,7 @@ export interface ConvaiConfig {
 }
 export interface ChatMessage {
     id: string;
-    type: 'user' | 'convai' | 'emotion' | 'behavior-tree' | 'action';
+    type: 'user' | 'convai' | 'emotion' | 'behavior-tree' | 'action' | 'user-llm-text' | 'bot-llm-text' | 'bot-emotion';
     content: string;
     timestamp: string;
 }

@@ -1,5 +1,6 @@
 import { useCallback } from "react";
-export const useTemplateKeysUpdater = (room) => {
+import { logger } from "../utils/logger";
+export const useTemplateKeysUpdater = (room, participantSid) => {
     const updateTemplateKeys = useCallback((templateKeys) => {
         if (room &&
             room.localParticipant &&
@@ -8,16 +9,16 @@ export const useTemplateKeysUpdater = (room) => {
                 type: "update-template-keys",
                 data: {
                     template_keys: templateKeys,
+                    participant_sid: participantSid || room.localParticipant.sid,
                 },
             };
             const encodedData = new TextEncoder().encode(JSON.stringify(message));
             room.localParticipant.publishData(encodedData, {
                 reliable: true,
-                destinationSids: [], // Send to all participants
             });
-            console.log("🔑 Template keys updated:", templateKeys);
+            logger.log("🔑 Template keys updated:", templateKeys, "SID:", participantSid || room.localParticipant.sid);
         }
-    }, [room]);
+    }, [room, participantSid]);
     return {
         updateTemplateKeys,
     };

@@ -10,6 +10,10 @@ export const ChatBot = ({ convaiClient, onConnect, }) => {
     const chatContainerRef = useRef(null);
     const inputRef = useRef(null);
     const { state, activity, chatMessages, sendUserTextMessage } = convaiClient;
+    // Filter messages to only show the specified types in chat UI
+    const filteredChatMessages = chatMessages.filter(message => message.type === 'user-llm-text' ||
+        message.type === 'bot-llm-text' ||
+        message.type === 'bot-emotion');
     // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
         if (messagesEndRef.current) {
@@ -18,18 +22,18 @@ export const ChatBot = ({ convaiClient, onConnect, }) => {
                 block: "end",
             });
         }
-    }, [chatMessages]);
+    }, [filteredChatMessages]);
     // Simulate typing indicator for Convai messages
     useEffect(() => {
-        if (chatMessages.length > 0) {
-            const lastMessage = chatMessages[chatMessages.length - 1];
-            if (lastMessage.type === "convai") {
+        if (filteredChatMessages.length > 0) {
+            const lastMessage = filteredChatMessages[filteredChatMessages.length - 1];
+            if (lastMessage.type === "bot-llm-text") {
                 setIsTyping(true);
                 const timer = setTimeout(() => setIsTyping(false), 1000);
                 return () => clearTimeout(timer);
             }
         }
-    }, [chatMessages]);
+    }, [filteredChatMessages]);
     const getStatusColor = () => {
         if (state.isConnected)
             return "bg-emerald-400 shadow-emerald-400/50";
@@ -73,12 +77,10 @@ export const ChatBot = ({ convaiClient, onConnect, }) => {
         }
     };
     const renderMessage = (message, index) => {
-        const isLastMessage = index === chatMessages.length - 1;
+        const isLastMessage = index === filteredChatMessages.length - 1;
         switch (message.type) {
-            case "user":
-                return (_jsx("div", { 
-                    // className="flex justify-end mb-6 animate-in slide-in-from-right-2 duration-300"
-                    style: {
+            case "user-llm-text":
+                return (_jsx("div", { style: {
                         padding: '8px 0',
                     }, children: _jsxs("div", { className: "items-end max-w-[85%]", style: {
                             display: 'flex',
@@ -88,10 +90,8 @@ export const ChatBot = ({ convaiClient, onConnect, }) => {
                                     marginRight: '12px',
                                     marginTop: '4px'
                                 }, children: _jsx("span", { className: "text-emerald-400/60 text-xs font-medium", children: "You" }) })] }) }, message.id));
-            case "convai":
-                return (_jsx("div", { 
-                    // className=" mb-6 animate-in slide-in-from-left-2 duration-300"
-                    style: {
+            case "bot-llm-text":
+                return (_jsx("div", { style: {
                         padding: '8px 0',
                     }, children: _jsxs("div", { className: "items-start max-w-[85%]", style: {
                             display: 'flex',
@@ -100,32 +100,15 @@ export const ChatBot = ({ convaiClient, onConnect, }) => {
                                     marginLeft: '12px',
                                     marginTop: '4px'
                                 }, children: _jsx("span", { className: "text-slate-400/60 text-xs font-medium", children: "Assistant" }) })] }) }, message.id));
+            case "bot-emotion":
+                return (_jsx("div", { className: "flex justify-center mb-4 animate-in fade-in duration-500", children: _jsx("div", { className: "bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full px-4 py-2 shadow-lg backdrop-blur-sm", children: _jsxs("p", { className: "text-purple-200 text-sm font-medium", children: ["\uD83D\uDE0A ", message.content] }) }) }, message.id));
+            // Legacy message types - these won't be shown in filtered view but handle them gracefully
+            case "user":
+            case "convai":
             case "emotion":
-                return (_jsx(_Fragment, {})
-                // <div
-                //   key={message.id}
-                //   className="flex justify-center mb-4 animate-in fade-in duration-500"
-                // >
-                //   <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full px-4 py-2 shadow-lg backdrop-blur-sm">
-                //     <p className="text-purple-200 text-sm font-medium">
-                //       😊 {message.content}
-                //     </p>
-                //   </div>
-                // </div>
-                );
             case "behavior-tree":
-                return (_jsx(_Fragment, {})
-                // <div
-                //   key={message.id}
-                //   className="flex justify-center mb-4 animate-in fade-in duration-500"
-                // >
-                //   <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-full px-4 py-2 shadow-lg backdrop-blur-sm">
-                //     <p className="text-blue-200 text-sm font-medium">
-                //       🌳 {message.content}
-                //     </p>
-                //   </div>
-                // </div>
-                );
+            case "action":
+                return null;
             default:
                 return null;
         }
@@ -149,7 +132,7 @@ export const ChatBot = ({ convaiClient, onConnect, }) => {
                                             }, children: [_jsx("p", { className: "text-sm font-semibold text-slate-300", children: "Ready to Chat" }), _jsx("p", { className: "text-xs opacity-75 max-w-48", children: "Click connect to start your conversation with the AI assistant" })] }) })) : (_jsx("div", { style: {
                                             height: '400px !important',
                                             overflowY: 'scroll'
-                                        }, children: chatMessages.map((message, index) => renderMessage(message, index)) })), _jsx("div", { ref: messagesEndRef })] }), _jsx("div", { className: "p-4 border-emerald-500/20 bg-slate-900/30", children: !state.isConnected ? (_jsx("button", { onClick: onConnect, disabled: state.isConnecting, className: "w-full px-4 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:from-emerald-500/50 disabled:to-emerald-600/50 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-emerald-500/25 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2 focus:ring-offset-slate-900 btn-hover-lift", children: state.isConnecting ? (_jsxs("div", { className: "flex items-center justify-center space-x-2", children: [_jsx("div", { className: "w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" }), _jsx("span", { children: "Connecting..." })] })) : (_jsx("div", { className: "flex items-center justify-center space-x-2", children: "Connect To Convai" })) })) : (_jsxs("div", { style: {
+                                        }, children: filteredChatMessages.map((message, index) => renderMessage(message, index)) })), _jsx("div", { ref: messagesEndRef })] }), _jsx("div", { className: "p-4 border-emerald-500/20 bg-slate-900/30", children: !state.isConnected ? (_jsx("button", { onClick: onConnect, disabled: state.isConnecting, className: "w-full px-4 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:from-emerald-500/50 disabled:to-emerald-600/50 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-emerald-500/25 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2 focus:ring-offset-slate-900 btn-hover-lift", children: state.isConnecting ? (_jsxs("div", { className: "flex items-center justify-center space-x-2", children: [_jsx("div", { className: "w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" }), _jsx("span", { children: "Connecting..." })] })) : (_jsx("div", { className: "flex items-center justify-center space-x-2", children: "Connect To Convai" })) })) : (_jsxs("div", { style: {
                                         width: '100%',
                                         display: 'flex',
                                         justifyContent: 'space-between',

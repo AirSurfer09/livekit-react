@@ -1,7 +1,8 @@
 import { useCallback } from "react";
 import { Room } from "livekit-client";
+import { logger } from "../utils/logger";
 
-export const useTriggerMessageSender = (room: Room | null) => {
+export const useTriggerMessageSender = (room: Room | null, participantSid?: string) => {
   const sendTriggerMessage = useCallback(
     (triggerName?: string, triggerMessage?: string) => {
       if (room && room.localParticipant) {
@@ -10,22 +11,23 @@ export const useTriggerMessageSender = (room: Room | null) => {
           data: {
             ...(triggerName && { trigger_name: triggerName }),
             ...(triggerMessage && { trigger_message: triggerMessage }),
+            participant_sid: participantSid || room.localParticipant.sid,
           },
         };
 
         const encodedData = new TextEncoder().encode(JSON.stringify(message));
         room.localParticipant.publishData(encodedData, {
           reliable: true,
-          destinationSids: [], // Send to all participants
         });
 
-        console.log("🎯 Trigger message sent:", {
+        logger.log("🎯 Trigger message sent:", {
           triggerName,
           triggerMessage,
+          sid: participantSid || room.localParticipant.sid,
         });
       }
     },
-    [room],
+    [room, participantSid],
   );
 
   return {

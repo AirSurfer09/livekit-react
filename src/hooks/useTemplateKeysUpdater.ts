@@ -1,11 +1,12 @@
 import { useCallback } from "react";
 import { Room } from "livekit-client";
+import { logger } from "../utils/logger";
 
 export interface TemplateKeys {
   [key: string]: string;
 }
 
-export const useTemplateKeysUpdater = (room: Room | null) => {
+export const useTemplateKeysUpdater = (room: Room | null, participantSid?: string) => {
   const updateTemplateKeys = useCallback(
     (templateKeys: TemplateKeys) => {
       if (
@@ -17,19 +18,19 @@ export const useTemplateKeysUpdater = (room: Room | null) => {
           type: "update-template-keys",
           data: {
             template_keys: templateKeys,
+            participant_sid: participantSid || room.localParticipant.sid,
           },
         };
 
         const encodedData = new TextEncoder().encode(JSON.stringify(message));
         room.localParticipant.publishData(encodedData, {
           reliable: true,
-          destinationSids: [], // Send to all participants
         });
 
-        console.log("🔑 Template keys updated:", templateKeys);
+        logger.log("🔑 Template keys updated:", templateKeys, "SID:", participantSid || room.localParticipant.sid);
       }
     },
-    [room],
+    [room, participantSid],
   );
 
   return {
