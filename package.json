@@ -1,5 +1,5 @@
 {
-  "name": "airsurfer-livekit-react",
+  "name": "@convai/web-handsfree",
   "version": "1.0.0",
   "description": "A React package for integrating Convai's AI-powered voice assistants with LiveKit for real-time audio/video conversations",
   "type": "module",
@@ -30,8 +30,8 @@
     "examples:clean": "pnpm clean && cd examples/react && pnpm clean"
   },
   "keywords": [
-    "livekit",
     "convai",
+    "livekit",
     "react",
     "typescript",
     "ai",
@@ -40,16 +40,16 @@
     "real-time",
     "webrtc"
   ],
-  "author": "Your Name <your.email@example.com>",
+  "author": "Convai <support@convai.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/airsurfer-livekit-react.git"
+    "url": "https://github.com/convai/web-handsfree.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/airsurfer-livekit-react/issues"
+    "url": "https://github.com/convai/web-handsfree/issues"
   },
-  "homepage": "https://github.com/yourusername/airsurfer-livekit-react#readme",
+  "homepage": "https://github.com/convai/web-handsfree#readme",
   "dependencies": {
     "@livekit/components-react": "^2.9.3",
     "@livekit/components-styles": "^1.1.4",

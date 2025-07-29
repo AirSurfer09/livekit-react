@@ -1,66 +1,6 @@
-# Convai React Example
+# @convai/web-handsfree Example
 
-This example demonstrates how to use the `airsurfer-livekit-react` package to integrate Convai's AI-powered voice assistants into a React application.
-
-## Features Demonstrated
-
-### 1. Basic Connection
-- Connect to Convai with API key and character ID
-- Real-time audio/video communication
-- Connection state management
-
-### 2. Message Sending Functions
-
-#### User Text Messages
-```typescript
-// Send a text message to the AI character
-convaiClient.sendUserTextMessage("Hello! How are you today?");
-```
-
-#### Trigger Messages
-```typescript
-// Send a trigger to activate narrative events
-convaiClient.sendTriggerMessage("character_introduction", "User just entered the room");
-```
-
-#### Template Keys Updates
-```typescript
-// Update dynamic template variables for character responses
-convaiClient.updateTemplateKeys({
-  user_name: "John",
-  location: "New York",
-  mood: "excited",
-  time_of_day: "morning"
-});
-```
-
-#### Dynamic Info Updates
-```typescript
-// Provide contextual information that influences character behavior
-convaiClient.updateDynamicInfo({
-  text: "The user is now in a virtual museum looking at ancient artifacts"
-});
-```
-
-### 3. Message Types Handled
-
-The example automatically handles various incoming message types:
-
-- **Bot LLM Text**: AI character responses
-- **User Transcription**: Speech-to-text results
-- **Bot Emotion**: Character emotional states
-- **Action Response**: Character actions and animations
-- **Behavior Tree Response**: Narrative flow information
-- **Moderation Response**: Content moderation results
-
-## Demo Controls
-
-When connected, the example provides demo buttons to test each message type:
-
-1. **Send Text Message**: Sends a user text message
-2. **Send Trigger**: Activates a narrative trigger
-3. **Update Template Keys**: Updates character template variables
-4. **Update Dynamic Info**: Provides contextual information
+This example demonstrates how to use the `@convai/web-handsfree` package to integrate Convai's AI-powered voice assistants into a React application.
 
 ## Setup
 
@@ -72,12 +12,11 @@ npm install
 2. Update the configuration in `src/App.tsx`:
 ```typescript
 await convaiClient.connect({
-  apiKey: "your-api-key-here",
-  characterId: "your-character-id-here",
+  apiKey: "your-convai-api-key",
+  characterId: "your-character-id",
   enableVideo: true,
   enableAudio: true,
   llmProvider: "gemini-baml",
-  // Optional: Add action configuration
   actionConfig: {
     actions: ["Wave", "Smile", "Point"],
     characters: [
@@ -96,109 +35,56 @@ await convaiClient.connect({
 npm run dev
 ```
 
-## Usage Patterns
+## Features
 
-### Basic Chat Interface
-The `ChatBot` component provides a complete chat interface that:
-- Displays all message types with appropriate styling
-- Handles user input and sends messages
-- Shows connection status and activity
-- Auto-scrolls to new messages
-
-### Video Display
-The `FloatingVideoDisplay` component shows:
-- Local camera feed
-- Connection status
-- Expandable/collapsible interface
-
-### Programmatic Message Sending
-You can send messages programmatically from anywhere in your app:
+### Message Sending
 
 ```typescript
-// Send a greeting when user connects
-useEffect(() => {
-  if (convaiClient.state.isConnected) {
-    convaiClient.sendUserTextMessage("Hello! I'm ready to chat.");
-  }
-}, [convaiClient.state.isConnected]);
+// Send text message
+convaiClient.sendUserTextMessage("Hello! How are you today?");
 
-// Update context when user changes location
-const handleLocationChange = (newLocation: string) => {
-  convaiClient.updateDynamicInfo({
-    text: `The user is now in ${newLocation}`
-  });
-};
+// Send trigger message
+convaiClient.sendTriggerMessage("character_introduction", "User just entered the room");
+
+// Update template keys
+convaiClient.updateTemplateKeys({
+  user_name: "John",
+  location: "New York",
+  mood: "excited"
+});
+
+// Update dynamic info
+convaiClient.updateDynamicInfo({
+  text: "The user is now in a virtual museum"
+});
 ```
 
-## Message Format Examples
+### Components
 
-### User Text Message
-```json
-{
-  "type": "user_text_message",
-  "data": {
-    "text": "Hello, how are you?"
-  }
-}
-```
+- **ChatBot**: Complete chat interface with message history
+- **FloatingVideoDisplay**: Local camera feed with mirroring support
 
-### Trigger Message
-```json
-{
-  "type": "trigger-message",
-  "data": {
-    "trigger_name": "character_introduction",
-    "trigger_message": "The user just entered the room"
-  }
-}
-```
+### Message Types
 
-### Template Keys Update
-```json
-{
-  "type": "update-template-keys",
-  "data": {
-    "template_keys": {
-      "user_name": "John",
-      "location": "New York",
-      "mood": "excited"
-    }
-  }
-}
-```
+- Bot LLM Text: AI character responses
+- User Transcription: Speech-to-text results
+- Bot Emotion: Character emotional states
+- Action Response: Character actions
+- Behavior Tree Response: Narrative flow
+- Moderation Response: Content moderation
 
-### Dynamic Info Update
-```json
-{
-  "type": "update-dynamic-info",
-  "data": {
-    "dynamic_info": {
-      "text": "The user is now in a virtual museum"
-    }
-  }
-}
-```
+## Demo Controls
 
-## Error Handling
+When connected, use the demo buttons to test:
+- Send Text Message
+- Send Trigger
+- Update Template Keys
+- Update Dynamic Info
+- Video Controls (mirror, show/hide)
 
-The example includes comprehensive error handling:
-- Connection errors are displayed to the user
-- Message sending errors are logged to console
-- Graceful fallbacks for failed operations
+## Get Convai Credentials
 
-## Styling
-
-The example uses Tailwind CSS with:
-- Glass morphism effects
-- Gradient backgrounds
-- Smooth animations with Framer Motion
-- Responsive design
-- Dark theme optimized for video content
-
-## Next Steps
-
-1. Replace the API key and character ID with your own
-2. Customize the action configuration for your use case
-3. Add your own UI components and styling
-4. Implement additional message handling logic
-5. Add error recovery and reconnection logic 
+1. Visit [convai.com](https://convai.com) and create an account
+2. Navigate to your dashboard
+3. Create a new character or use an existing one
+4. Copy your API key and character ID 

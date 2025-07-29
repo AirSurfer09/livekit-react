@@ -1,7 +1,7 @@
 {
-  "name": "airsurfer-livekit-react-example",
+  "name": "@convai/web-handsfree-example",
   "version": "1.0.0",
-  "description": "React example for airsurfer-livekit-react",
+  "description": "React example for @convai/web-handsfree",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,7 +12,7 @@
   "dependencies": {
     "@livekit/components-react": "^2.9.3",
     "@livekit/components-styles": "^1.1.4",
-    "airsurfer-livekit-react": "workspace:*",
+    "@convai/web-handsfree": "workspace:*",
     "framer-motion": "^11.18.0",
     "livekit-client": "^2.8.0",
     "react": "^18.0.0",

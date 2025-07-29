@@ -54,12 +54,12 @@ const noop = () => {
 
 // Development logger functions
 const devLogger = {
-  log: (...args: any[]) => console.log('[Airsurfer]', ...args),
-  warn: (...args: any[]) => console.warn('[Airsurfer]', ...args),
-  error: (...args: any[]) => console.error('[Airsurfer]', ...args),
-  info: (...args: any[]) => console.info('[Airsurfer]', ...args),
-  debug: (...args: any[]) => console.debug('[Airsurfer]', ...args),
-  trace: (...args: any[]) => console.trace('[Airsurfer]', ...args),
+  log: (...args: any[]) => console.log('[Convai]', ...args),
+  warn: (...args: any[]) => console.warn('[Convai]', ...args),
+  error: (...args: any[]) => console.error('[Convai]', ...args),
+  info: (...args: any[]) => console.info('[Convai]', ...args),
+  debug: (...args: any[]) => console.debug('[Convai]', ...args),
+  trace: (...args: any[]) => console.trace('[Convai]', ...args),
 };
 
 // Production logger functions (all no-ops)

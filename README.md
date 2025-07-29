@@ -1,60 +1,24 @@
-# Airsurfer LiveKit React
+# @convai/web-handsfree
 
-A React package for integrating Convai's AI-powered voice assistants to web for real-time audio/video conversations.
-
-## Features
-
-- 🎤 Real-time voice conversations with AI assistants
-- 📹 Video streaming support
-- 💬 Chat interface with message history
-- 🎯 Trigger message support
-- 🔑 Template keys management
-- 🔄 Dynamic info updates
-- 🎭 Action responses
-- 🌳 Behavior tree responses
-- 🛡️ Moderation responses
+A React package for integrating Convai's AI-powered voice assistants with LiveKit for real-time audio/video conversations.
 
 ## Installation
 
 ```bash
-npm install airsurfer-livekit-react
+npm install @convai/web-handsfree
 ```
 
-## Environment Configuration
-
-### Development Logging
-
-To enable detailed logging in development mode, create a `.env` file in your project root:
-
-```bash
-# Copy the example environment file
-cp env.example .env
-```
-
-The `.env` file should contain:
-```env
-NODE_ENV=development
-REACT_APP_ENV=development
-```
-
-### Logging Levels
-
-- **Development Mode**: All colored console logs are displayed
-- **Production Mode**: No console logs are displayed (clean production builds)
-
-## Usage
-
-### Basic Setup
+## Quick Start
 
 ```tsx
-import { useConvaiClient, ChatBot } from 'airsurfer-livekit-react';
+import { useConvaiClient, ChatBot } from '@convai/web-handsfree';
 
 function App() {
   const convaiClient = useConvaiClient();
 
   const connect = async () => {
     await convaiClient.connect({
-      apiKey: 'your-api-key',
+      apiKey: 'your-convai-api-key',
       characterId: 'your-character-id',
       enableVideo: true,
       enableAudio: true,
@@ -62,38 +26,34 @@ function App() {
   };
 
   return (
-    <div>
-      <ChatBot convaiClient={convaiClient} onConnect={connect} />
-    </div>
+    <ChatBot convaiClient={convaiClient} onConnect={connect} />
   );
 }
 ```
 
-### Message Types
+## Setup
 
-The library handles various message types:
+### Get Convai Credentials
 
-#### User Messages (Chat UI)
-- **🎤 User Transcriptions**: Speech-to-text transcriptions (shown in chat)
-- **🚫 User Text Messages**: Programmatic text messages (sent to Convai, not shown in chat)
+1. Visit [convai.com](https://convai.com) and create an account
+2. Navigate to your dashboard
+3. Create a new character or use an existing one
+4. Copy your API key and character ID
 
-#### Assistant Messages (Chat UI)
-- **🤖 Convai Messages**: Assistant responses
-- **😊 Convai Emotions**: Bot emotion states
+### Environment Configuration
 
-#### System Messages (Client Access Only)
-- **🎭 Action Responses**: Character actions
-- **🌳 Behavior Tree Responses**: Narrative responses
-- **🛡️ Moderation Responses**: Content moderation
-- **🎯 Trigger Messages**: System triggers
-- **🔑 Template Keys**: Template updates
-- **🔄 Dynamic Info**: Dynamic information updates
+Create a `.env` file in your project root:
 
-### API Reference
+```env
+NODE_ENV=development
+REACT_APP_ENV=development
+```
 
-#### useConvaiClient()
+## API Reference
 
-Returns a Convai client with the following methods:
+### useConvaiClient()
+
+Main hook for managing Convai connections.
 
 ```tsx
 const {
@@ -101,7 +61,7 @@ const {
   connect,                  // Connect to Convai
   disconnect,               // Disconnect from Convai
   room,                     // LiveKit room instance
-  sendUserTextMessage,      // Send text message (not shown in chat)
+  sendUserTextMessage,      // Send text message
   sendTriggerMessage,       // Send trigger message
   updateTemplateKeys,       // Update template keys
   updateDynamicInfo,        // Update dynamic info
@@ -112,7 +72,7 @@ const {
 } = useConvaiClient();
 ```
 
-#### Configuration Options
+### Configuration
 
 ```tsx
 interface ConvaiConfig {
@@ -126,68 +86,88 @@ interface ConvaiConfig {
 }
 ```
 
-### Components
+## Components
 
-#### FloatingVideoDisplay
+### ChatBot
 
-A floating video display component that shows the local camera feed with optional mirroring.
+Complete chat interface with message history and connection handling.
 
 ```tsx
-import { FloatingVideoDisplay } from 'airsurfer-livekit-react';
-
-function App() {
-  const [isVideoMirrored, setIsVideoMirrored] = useState(false);
-  
-  return (
-    <FloatingVideoDisplay
-      room={convaiClient.room}
-      videoTrack={convaiClient.videoTrack}
-      mirror={isVideoMirrored} // Enable horizontal mirroring
-    />
-  );
-}
+<ChatBot 
+  convaiClient={convaiClient} 
+  onConnect={handleConnect} 
+/>
 ```
 
-**Props:**
-- `room?: Room | null` - LiveKit room instance
-- `videoTrack?: any` - Video track reference
-- `mirror?: boolean` - Whether to mirror the video horizontally (default: false)
+### FloatingVideoDisplay
 
-**Features:**
-- 📹 Local camera feed display
-- 🔄 Horizontal video mirroring (like a mirror reflection)
-- 📱 Responsive design with expand/collapse functionality
-- 🎨 Glass morphism UI styling
+Floating video display with optional mirroring.
+
+```tsx
+<FloatingVideoDisplay
+  room={convaiClient.room}
+  videoTrack={convaiClient.videoTrack}
+  mirror={true} // Enable horizontal mirroring
+/>
+```
 
 ## Development
 
-### Logging
+### Prerequisites
 
-In development mode, you'll see colored console logs for:
+- Node.js 18 or higher
+- pnpm (recommended) or npm
+- Convai API key and character ID
 
-- 📨 **Incoming Messages**: All received messages
-- 💬 **User Messages**: Text messages sent
-- 🎤 **User Transcriptions**: Speech transcriptions
-- 🤖 **Convai Messages**: Assistant responses
-- 😊 **Convai Emotions**: Bot emotions
-- 🎭 **Action Responses**: Character actions
-- 🌳 **Behavior Tree**: Narrative responses
-- 🛡️ **Moderation**: Content moderation
-- 🚫 **Skipped Messages**: Duplicate prevention
-- 🔍 **Unhandled Types**: Unknown message types
+### Local Setup
 
-### Building
-
+1. Clone the repository:
 ```bash
-# Install dependencies
-npm install
-
-# Build the package
-npm run build
-
-# Run tests
-npm test
+git clone https://github.com/convai/web-handsfree.git
+cd web-handsfree
 ```
+
+2. Install dependencies:
+```bash
+pnpm install
+```
+
+3. Build the package:
+```bash
+pnpm build
+```
+
+4. Run the example:
+```bash
+pnpm examples:dev
+```
+
+### Available Scripts
+
+- `pnpm build` - Build the package
+- `pnpm dev` - Watch mode for development
+- `pnpm examples:dev` - Run the React example
+- `pnpm examples:build` - Build the React example
+
+## Contributing
+
+This project uses [Changesets](https://github.com/changesets/changesets) for versioning and releases.
+
+### Making Changes
+
+1. Create a feature branch
+2. Make your changes
+3. Create a changeset:
+```bash
+pnpm changeset
+```
+4. Follow the prompts to describe your changes
+5. Commit the changeset file
+6. Push and create a pull request
+
+### Release Process
+
+Releases are automated via GitHub Actions. When changesets are merged to main, a release PR will be created automatically.
 
 ## License
 

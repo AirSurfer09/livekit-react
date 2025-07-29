@@ -4,7 +4,7 @@ import {
   useConvaiClient,
   ChatBot,
   FloatingVideoDisplay,
-} from "airsurfer-livekit-react";
+} from "@convai/web-handsfree";
 import "./App.css";
 
 export default function App() {
