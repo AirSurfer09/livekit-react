@@ -1,0 +1,1 @@
+{"version":3,"file":"useConvaiClient.d.ts","sourceRoot":"","sources":["../../src/hooks/useConvaiClient.ts"],"names":[],"mappings":"AAEA,OAAO,EAEL,YAAY,EAEZ,WAAW,EACZ,MAAM,UAAU,CAAC;AAYlB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;GA8BG;AACH,eAAO,MAAM,eAAe,QAAO,YAAY,GAAG;IAChD,QAAQ,EAAE,MAAM,CAAC;IACjB,YAAY,EAAE,WAAW,EAAE,CAAC;CAkM7B,CAAC"}
