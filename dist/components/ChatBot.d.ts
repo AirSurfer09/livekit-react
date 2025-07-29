@@ -1,5 +1,5 @@
-import React from 'react';
-import { ConvaiClient } from '../types';
+import React from "react";
+import { ConvaiClient } from "../types";
 interface ChatBotProps {
     convaiClient: ConvaiClient & {
         activity?: string;
