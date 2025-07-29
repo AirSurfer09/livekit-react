@@ -1,63 +1,204 @@
-# React Example
+# Convai React Example
 
-This is a React example demonstrating the usage of the airsurfer-livekit-react package with full Convai integration.
+This example demonstrates how to use the `airsurfer-livekit-react` package to integrate Convai's AI-powered voice assistants into a React application.
 
-## Features
+## Features Demonstrated
 
-- **Connection Management**: Connect to Convai Core Service API
-- **RTVI Triggers**: Send trigger messages and commands
-- **Transcription Display**: Real-time chat transcriptions
-- **LiveKit Integration**: Full LiveKit room context support
-- **TypeScript Support**: Complete type safety
+### 1. Basic Connection
+- Connect to Convai with API key and character ID
+- Real-time audio/video communication
+- Connection state management
 
-## Development
+### 2. Message Sending Functions
 
-```bash
-# Install dependencies
-pnpm install
-
-# Start development server
-pnpm dev
-
-# Build for production
-pnpm build
-
-# Preview production build
-pnpm preview
+#### User Text Messages
+```typescript
+// Send a text message to the AI character
+convaiClient.sendUserTextMessage("Hello! How are you today?");
 ```
 
-## Usage
+#### Trigger Messages
+```typescript
+// Send a trigger to activate narrative events
+convaiClient.sendTriggerMessage("character_introduction", "User just entered the room");
+```
 
-1. **Start the development server**: `pnpm dev`
-2. **Open the application**: Navigate to `http://localhost:3000`
-3. **Connect to Convai**: Click the "Connect to Convai" button
-4. **Use RTVI Triggers**: Send trigger messages using the trigger controls
-5. **View Transcriptions**: See real-time chat transcriptions
+#### Template Keys Updates
+```typescript
+// Update dynamic template variables for character responses
+convaiClient.updateTemplateKeys({
+  user_name: "John",
+  location: "New York",
+  mood: "excited",
+  time_of_day: "morning"
+});
+```
 
-## Configuration
+#### Dynamic Info Updates
+```typescript
+// Provide contextual information that influences character behavior
+convaiClient.updateDynamicInfo({
+  text: "The user is now in a virtual museum looking at ancient artifacts"
+});
+```
 
-The example uses the following Convai configuration:
+### 3. Message Types Handled
+
+The example automatically handles various incoming message types:
+
+- **Bot LLM Text**: AI character responses
+- **User Transcription**: Speech-to-text results
+- **Bot Emotion**: Character emotional states
+- **Action Response**: Character actions and animations
+- **Behavior Tree Response**: Narrative flow information
+- **Moderation Response**: Content moderation results
+
+## Demo Controls
+
+When connected, the example provides demo buttons to test each message type:
+
+1. **Send Text Message**: Sends a user text message
+2. **Send Trigger**: Activates a narrative trigger
+3. **Update Template Keys**: Updates character template variables
+4. **Update Dynamic Info**: Provides contextual information
+
+## Setup
+
+1. Install dependencies:
+```bash
+npm install
+```
+
+2. Update the configuration in `src/App.tsx`:
+```typescript
+await convaiClient.connect({
+  apiKey: "your-api-key-here",
+  characterId: "your-character-id-here",
+  enableVideo: true,
+  enableAudio: true,
+  llmProvider: "gemini-baml",
+  // Optional: Add action configuration
+  actionConfig: {
+    actions: ["Wave", "Smile", "Point"],
+    characters: [
+      { name: "Character", bio: "Character description" },
+      { name: "Player", bio: "" }
+    ],
+    objects: [
+      { name: "Object", description: "Object description" }
+    ]
+  }
+});
+```
+
+3. Run the development server:
+```bash
+npm run dev
+```
+
+## Usage Patterns
+
+### Basic Chat Interface
+The `ChatBot` component provides a complete chat interface that:
+- Displays all message types with appropriate styling
+- Handles user input and sends messages
+- Shows connection status and activity
+- Auto-scrolls to new messages
+
+### Video Display
+The `FloatingVideoDisplay` component shows:
+- Local camera feed
+- Connection status
+- Expandable/collapsible interface
+
+### Programmatic Message Sending
+You can send messages programmatically from anywhere in your app:
 
 ```typescript
+// Send a greeting when user connects
+useEffect(() => {
+  if (convaiClient.state.isConnected) {
+    convaiClient.sendUserTextMessage("Hello! I'm ready to chat.");
+  }
+}, [convaiClient.state.isConnected]);
+
+// Update context when user changes location
+const handleLocationChange = (newLocation: string) => {
+  convaiClient.updateDynamicInfo({
+    text: `The user is now in ${newLocation}`
+  });
+};
+```
+
+## Message Format Examples
+
+### User Text Message
+```json
 {
-  token: 'cdfb24c99142cdc8ecf9003498d14ca6',
-  character_id: '700e3450-3242-11f0-a5ce-42010a7be01f',
-  transport: 'livekit',
-  connection_type: 'audio',
-  llm_provider: 'gemini'
+  "type": "user_text_message",
+  "data": {
+    "text": "Hello, how are you?"
+  }
 }
 ```
 
-## Architecture
+### Trigger Message
+```json
+{
+  "type": "trigger-message",
+  "data": {
+    "trigger_name": "character_introduction",
+    "trigger_message": "The user just entered the room"
+  }
+}
+```
 
-- **RoomContext**: Provides LiveKit room context to all components
-- **useConvaiClient**: Manages connection state and room instance
-- **TranscriptionView**: Displays real-time chat transcriptions
-- **RTVITriggerControls**: UI for sending RTVI trigger messages
+### Template Keys Update
+```json
+{
+  "type": "update-template-keys",
+  "data": {
+    "template_keys": {
+      "user_name": "John",
+      "location": "New York",
+      "mood": "excited"
+    }
+  }
+}
+```
 
-## Troubleshooting
+### Dynamic Info Update
+```json
+{
+  "type": "update-dynamic-info",
+  "data": {
+    "dynamic_info": {
+      "text": "The user is now in a virtual museum"
+    }
+  }
+}
+```
 
-If you encounter the "No room provided" error, ensure that:
-1. The connection is successful
-2. The room is properly initialized
-3. Components are wrapped in RoomContext.Provider 
+## Error Handling
+
+The example includes comprehensive error handling:
+- Connection errors are displayed to the user
+- Message sending errors are logged to console
+- Graceful fallbacks for failed operations
+
+## Styling
+
+The example uses Tailwind CSS with:
+- Glass morphism effects
+- Gradient backgrounds
+- Smooth animations with Framer Motion
+- Responsive design
+- Dark theme optimized for video content
+
+## Next Steps
+
+1. Replace the API key and character ID with your own
+2. Customize the action configuration for your use case
+3. Add your own UI components and styling
+4. Implement additional message handling logic
+5. Add error recovery and reconnection logic 

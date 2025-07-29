@@ -4,12 +4,12 @@ import { RoomContext, RoomAudioRenderer, } from "@livekit/components-react";
 export const ChatBot = ({ convaiClient, onConnect, }) => {
     const [isMinimized, setIsMinimized] = useState(false);
     const [isTyping, setIsTyping] = useState(false);
-    const [inputText, setInputText] = useState('');
+    const [inputText, setInputText] = useState("");
     const [isSending, setIsSending] = useState(false);
     const messagesEndRef = useRef(null);
     const chatContainerRef = useRef(null);
     const inputRef = useRef(null);
-    const { state, activity, chatMessages, sendTextMessage } = convaiClient;
+    const { state, activity, chatMessages, sendUserTextMessage } = convaiClient;
     // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
         if (messagesEndRef.current) {
@@ -55,18 +55,19 @@ export const ChatBot = ({ convaiClient, onConnect, }) => {
             return;
         setIsSending(true);
         try {
-            sendTextMessage(inputText);
-            setInputText('');
+            console.log("MESSAGE", inputText);
+            sendUserTextMessage(inputText);
+            setInputText("");
         }
         catch (error) {
-            console.error('Failed to send message:', error);
+            console.error("Failed to send message:", error);
         }
         finally {
             setIsSending(false);
         }
     };
     const handleKeyPress = (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
+        if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
             handleSendMessage();
         }

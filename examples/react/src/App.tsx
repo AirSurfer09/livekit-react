@@ -125,12 +125,64 @@ export default function App() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center space-x-3 px-6 py-3 bg-emerald-500/10 backdrop-blur-sm border border-emerald-500/20 rounded-2xl"
+              className="space-y-4"
             >
-              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-              <span className="text-emerald-400 font-medium">
-                Connected & Ready
-              </span>
+              <div className="inline-flex items-center space-x-3 px-6 py-3 bg-emerald-500/10 backdrop-blur-sm border border-emerald-500/20 rounded-2xl">
+                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                <span className="text-emerald-400 font-medium">
+                  Connected & Ready
+                </span>
+              </div>
+
+              {/* Demo Controls */}
+              <div className="flex flex-wrap justify-center gap-3">
+                <button
+                  onClick={() =>
+                    convaiClient.sendUserTextMessage(
+                      "Hello! How are you today?",
+                    )
+                  }
+                  className="px-4 py-2 bg-emerald-500/20 border border-emerald-500/30 rounded-lg text-emerald-300 hover:bg-emerald-500/30 transition-colors text-sm"
+                >
+                  Send Text Message
+                </button>
+
+                <button
+                  onClick={() =>
+                    convaiClient.sendTriggerMessage(
+                      "character_introduction",
+                      "User just entered the room",
+                    )
+                  }
+                  className="px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-300 hover:bg-blue-500/30 transition-colors text-sm"
+                >
+                  Send Trigger
+                </button>
+
+                <button
+                  onClick={() =>
+                    convaiClient.updateTemplateKeys({
+                      user_name: "Demo User",
+                      location: "Virtual Space",
+                      mood: "curious",
+                    })
+                  }
+                  className="px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-300 hover:bg-purple-500/30 transition-colors text-sm"
+                >
+                  Update Template Keys
+                </button>
+
+                <button
+                  onClick={() =>
+                    convaiClient.updateDynamicInfo({
+                      text: "The user is now exploring a virtual museum with ancient artifacts",
+                    })
+                  }
+                  className="px-4 py-2 bg-orange-500/20 border border-orange-500/30 rounded-lg text-orange-300 hover:bg-orange-500/30 transition-colors text-sm"
+                >
+                  Update Dynamic Info
+                </button>
+              </div>
             </motion.div>
           )}
         </motion.div>

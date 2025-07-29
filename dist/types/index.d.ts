@@ -21,7 +21,7 @@ export interface ConvaiConfig {
 }
 export interface ChatMessage {
     id: string;
-    type: 'user' | 'convai' | 'emotion' | 'behavior-tree';
+    type: 'user' | 'convai' | 'emotion' | 'behavior-tree' | 'action';
     content: string;
     timestamp: string;
 }
@@ -42,7 +42,13 @@ export interface ConvaiClient {
     room: Room;
     videoTrack: any;
     audioTrack: any;
-    sendRTVI: (triggerName: string, message?: string) => void;
-    sendTextMessage: (text: string) => void;
+    sendUserTextMessage: (text: string) => void;
+    sendTriggerMessage: (triggerName?: string, triggerMessage?: string) => void;
+    updateTemplateKeys: (templateKeys: {
+        [key: string]: string;
+    }) => void;
+    updateDynamicInfo: (dynamicInfo: {
+        text: string;
+    }) => void;
     chatMessages: ChatMessage[];
 }

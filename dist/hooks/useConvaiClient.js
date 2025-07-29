@@ -1,5 +1,10 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { Room, RoomEvent } from "livekit-client";
+import { Room } from "livekit-client";
+import { useUserTextMessageSender } from "./useUserTextMessageSender";
+import { useTriggerMessageSender } from "./useTriggerMessageSender";
+import { useTemplateKeysUpdater } from "./useTemplateKeysUpdater";
+import { useDynamicInfoUpdater } from "./useDynamicInfoUpdater";
+import { useMessageHandler } from "./useMessageHandler";
 const DEFAULT_CORE_SERVICE_URL = "https://realtime-api.convai.com";
 export const useConvaiClient = () => {
     const [room] = useState(new Room());
@@ -7,135 +12,18 @@ export const useConvaiClient = () => {
     const [isConnecting, setIsConnecting] = useState(false);
     const [activity, setActivity] = useState("Idle");
     const [chatMessages, setChatMessages] = useState([]);
+    // Initialize message sender hooks
+    const { sendUserTextMessage } = useUserTextMessageSender(room);
+    const { sendTriggerMessage } = useTriggerMessageSender(room);
+    const { updateTemplateKeys } = useTemplateKeysUpdater(room);
+    const { updateDynamicInfo } = useDynamicInfoUpdater(room);
+    // Initialize message handler
+    const { setupMessageListener } = useMessageHandler(room, setChatMessages);
     // Data message listener effect
     useEffect(() => {
-        if (!room)
-            return;
-        const handleDataReceived = (payload, participant) => {
-            try {
-                // Decode bytes to string
-                const decoder = new TextDecoder();
-                const messageString = decoder.decode(payload);
-                // Parse JSON
-                const messageData = JSON.parse(messageString);
-                console.log("📨 Data message received:", messageData);
-                // Extract and categorize messages for chat display
-                const timestamp = new Date().toISOString();
-                const messageId = `${messageData.type}-${Date.now()}-${Math.random()}`;
-                // Handle different message types
-                switch (messageData.type) {
-                    case "user-llm-text":
-                    case "text-input":
-                    case "user-input":
-                    case "text-message":
-                    case "chat-message":
-                    case "input-text":
-                    case "message":
-                        // User chat message
-                        if (messageData.data?.text ||
-                            messageData.message ||
-                            messageData.text ||
-                            messageData.content) {
-                            const userMessage = {
-                                id: messageId,
-                                type: "user",
-                                content: messageData.data?.text ||
-                                    messageData.message ||
-                                    messageData.text ||
-                                    messageData.content,
-                                timestamp,
-                            };
-                            setChatMessages((prev) => [...prev, userMessage]);
-                        }
-                        break;
-                    case "bot-llm-text":
-                        // Convai response
-                        if (messageData.data?.text) {
-                            const convaiMessage = {
-                                id: messageId,
-                                type: "convai",
-                                content: messageData.data.text,
-                                timestamp,
-                            };
-                            setChatMessages((prev) => [...prev, convaiMessage]);
-                            console.log("🤖 Convai Response:", messageData.data.text);
-                        }
-                        break;
-                    case "server-message":
-                        // Handle server messages
-                        if (messageData.data?.emotion) {
-                            // Emotion display
-                            const emotionMessage = {
-                                id: messageId,
-                                type: "emotion",
-                                content: messageData.data.emotion,
-                                timestamp,
-                            };
-                            setChatMessages((prev) => [...prev, emotionMessage]);
-                            console.log("😊 Emotion:", messageData.data.emotion);
-                        }
-                        else if (messageData.data?.type === "behavior-tree-response" &&
-                            messageData.data?.narrative_section_id) {
-                            // Behavior tree response
-                            const behaviorMessage = {
-                                id: messageId,
-                                type: "behavior-tree",
-                                content: messageData.data.narrative_section_id,
-                                timestamp,
-                            };
-                            setChatMessages((prev) => [...prev, behaviorMessage]);
-                            console.log("🌳 Behavior Tree:", messageData.data.narrative_section_id);
-                        }
-                        break;
-                }
-                // Special handling for RTVI messages
-                if (messageData.type && messageData.type.includes("rtvi")) {
-                    console.log("🤖 RTVI Message:", messageData);
-                }
-                // Special handling for trigger messages
-                if (messageData.type === "trigger-message") {
-                    console.log("🎯 Trigger Message Response:", messageData);
-                }
-                // Log any unhandled message types
-                if (![
-                    "user-llm-text",
-                    "text-input",
-                    "user-input",
-                    "text-message",
-                    "chat-message",
-                    "input-text",
-                    "message",
-                    "bot-llm-text",
-                    "server-message",
-                    "trigger-message",
-                ].includes(messageData.type)) {
-                    console.log("🔍 Unhandled message type:", messageData.type, messageData);
-                }
-            }
-            catch (error) {
-                console.group("❌ Failed to parse incoming data message");
-                console.error("Parse Error:", error);
-                console.log("Raw bytes length:", payload.length);
-                // Try to decode as string even if JSON parsing fails
-                try {
-                    const decoder = new TextDecoder();
-                    const messageString = decoder.decode(payload);
-                    console.log("Raw string content:", messageString);
-                }
-                catch (decodeError) {
-                    console.error("Failed to decode as string:", decodeError);
-                    console.log("Raw bytes (first 100):", Array.from(payload.slice(0, 100)));
-                }
-                console.groupEnd();
-            }
-        };
-        // Listen for data received events
-        room.on(RoomEvent.DataReceived, handleDataReceived);
-        // Cleanup listener on unmount
-        return () => {
-            room.off(RoomEvent.DataReceived, handleDataReceived);
-        };
-    }, [room]);
+        const cleanup = setupMessageListener();
+        return cleanup;
+    }, [setupMessageListener]);
     // Create client state
     const state = useMemo(() => ({
         isConnected,
@@ -254,27 +142,6 @@ export const useConvaiClient = () => {
             });
         }
     }, [room]);
-    // Send text message
-    const sendTextMessage = useCallback((text) => {
-        if (room && room.localParticipant && text.trim()) {
-            // Add user message to chat immediately
-            const timestamp = new Date().toISOString();
-            const messageId = `user-${Date.now()}-${Math.random()}`;
-            const userMessage = {
-                id: messageId,
-                type: "user",
-                content: text.trim(),
-                timestamp,
-            };
-            setChatMessages((prev) => [...prev, userMessage]);
-            // Send only the string data without any type wrapper
-            const encodedData = new TextEncoder().encode(text.trim());
-            room.localParticipant.publishData(encodedData, {
-                reliable: true,
-            });
-            console.log("💬 Text message sent:", text.trim());
-        }
-    }, [room]);
     // Return client object with activity and chat messages
     return {
         state,
@@ -285,8 +152,10 @@ export const useConvaiClient = () => {
         room,
         videoTrack: null,
         audioTrack: null,
-        sendRTVI: () => { }, // Placeholder for unused function
-        sendTextMessage,
+        sendUserTextMessage,
+        sendTriggerMessage,
+        updateTemplateKeys,
+        updateDynamicInfo,
         activity,
         chatMessages,
     };

@@ -19,12 +19,12 @@ export const ChatBot: React.FC<ChatBotProps> = ({
 }) => {
   const [isMinimized, setIsMinimized] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [inputText, setInputText] = useState('');
+  const [inputText, setInputText] = useState("");
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { state, activity, chatMessages, sendTextMessage } = convaiClient;
+  const { state, activity, chatMessages, sendUserTextMessage } = convaiClient;
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -69,20 +69,21 @@ export const ChatBot: React.FC<ChatBotProps> = ({
 
   const handleSendMessage = async () => {
     if (!inputText.trim() || isSending || !state.isConnected) return;
-    
+
     setIsSending(true);
     try {
-      sendTextMessage(inputText);
-      setInputText('');
+      console.log("MESSAGE", inputText);
+      sendUserTextMessage(inputText);
+      setInputText("");
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error("Failed to send message:", error);
     } finally {
       setIsSending(false);
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
