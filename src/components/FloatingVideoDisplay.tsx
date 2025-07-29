@@ -6,10 +6,44 @@ import { useLocalCameraTrack } from "../hooks/useLocalCameraTrack";
 interface FloatingVideoDisplayProps {
   room?: Room | null;
   videoTrack?: any;
+  /** 
+   * Whether to mirror the video horizontally (like a mirror reflection).
+   * Useful for selfie-style video displays where users expect to see themselves
+   * as they would in a mirror.
+   * @default true
+   */
+  mirror?: boolean;
 }
 
+/**
+ * FloatingVideoDisplay component for displaying local camera feed in a floating window.
+ * 
+ * Provides a collapsible video display with optional horizontal mirroring.
+ * Ideal for selfie-style applications where users expect mirror-like behavior.
+ * 
+ * @param {FloatingVideoDisplayProps} props - Component props
+ * @param {Room | null} props.room - LiveKit room instance
+ * @param {any} props.videoTrack - Video track reference (optional)
+ * @param {boolean} props.mirror - Enable horizontal video mirroring (default: true)
+ * 
+ * @example
+ * ```tsx
+ * function App() {
+ *   const convaiClient = useConvaiClient();
+ *   
+ *   return (
+ *     <FloatingVideoDisplay
+ *       room={convaiClient.room}
+ *       videoTrack={convaiClient.videoTrack}
+ *       mirror={true}
+ *     />
+ *   );
+ * }
+ * ```
+ */
 export const FloatingVideoDisplay: React.FC<FloatingVideoDisplayProps> = ({
   room,
+  mirror = true, 
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -125,7 +159,7 @@ export const FloatingVideoDisplay: React.FC<FloatingVideoDisplayProps> = ({
         >
           {isExpanded && (
             <div className="p-4">
-              <LocalVideoDisplay />
+              <LocalVideoDisplay mirror={mirror} />
             </div>
           )}
         </div>
@@ -134,7 +168,23 @@ export const FloatingVideoDisplay: React.FC<FloatingVideoDisplayProps> = ({
   );
 };
 
-export const LocalVideoDisplay: React.FC = () => {
+/**
+ * LocalVideoDisplay component for rendering local camera feed.
+ * 
+ * Displays the local participant's camera with optional horizontal mirroring.
+ * Shows appropriate placeholder when camera is disabled or unavailable.
+ * 
+ * @param {Object} props - Component props
+ * @param {boolean} props.mirror - Enable horizontal video mirroring (default: false)
+ * 
+ * @example
+ * ```tsx
+ * function VideoComponent() {
+ *   return <LocalVideoDisplay mirror={true} />;
+ * }
+ * ```
+ */
+export const LocalVideoDisplay: React.FC<{ mirror?: boolean }> = ({ mirror = false }) => {
   const cameraTrackRef = useLocalCameraTrack();
 
   if (!cameraTrackRef.publication?.isSubscribed) {
@@ -181,7 +231,15 @@ export const LocalVideoDisplay: React.FC = () => {
 
   return (
     <div className="w-full h-40 rounded-xl overflow-hidden border border-emerald-500/30 relative bg-slate-900/30 backdrop-blur-sm">
-      <VideoTrack trackRef={cameraTrackRef} />
+      <div 
+        style={{
+          transform: mirror ? 'scaleX(-1)' : 'none',
+          width: '100%',
+          height: '100%',
+        }}
+      >
+        <VideoTrack trackRef={cameraTrackRef} />
+      </div>
       <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg border border-white/20">
         You
       </div>

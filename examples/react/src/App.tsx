@@ -9,6 +9,7 @@ import "./App.css";
 
 export default function App() {
   const convaiClient = useConvaiClient();
+  const [isVideoMirrored, setIsVideoMirrored] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const onConnectButtonClicked = useCallback(async () => {
@@ -198,6 +199,13 @@ export default function App() {
                   Show Video
                 </button>
 
+                <button
+                  onClick={() => setIsVideoMirrored(!isVideoMirrored)}
+                  className="px-4 py-2 bg-yellow-500/20 border border-yellow-500/30 rounded-lg text-yellow-300 hover:bg-yellow-500/30 transition-colors text-sm"
+                >
+                  {isVideoMirrored ? "Unmirror Video" : "Mirror Video"}
+                </button>
+
                 {/* Disconnect Button */}
                 <button
                   onClick={() => convaiClient.disconnect()}
@@ -216,6 +224,7 @@ export default function App() {
         <FloatingVideoDisplay
           room={convaiClient.room}
           videoTrack={convaiClient.videoTrack}
+          mirror={isVideoMirrored}
         />
       </div>
 

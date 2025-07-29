@@ -1,29 +1,46 @@
 import { useCallback, useState, useEffect } from "react";
-import { Room, LocalParticipant } from "livekit-client";
+import { Room } from "livekit-client";
 import { logger } from "../utils/logger";
 
 export interface AudioControls {
-  // Audio state
   isAudioEnabled: boolean;
   isAudioMuted: boolean;
   audioLevel: number;
-  
-  // Audio controls
   enableAudio: () => Promise<void>;
   disableAudio: () => Promise<void>;
   muteAudio: () => Promise<void>;
   unmuteAudio: () => Promise<void>;
   toggleAudio: () => Promise<void>;
-  
-  // Audio settings
   setAudioDevice: (deviceId: string) => Promise<void>;
   getAudioDevices: () => Promise<MediaDeviceInfo[]>;
-  
-  // Audio monitoring
   startAudioLevelMonitoring: () => void;
   stopAudioLevelMonitoring: () => void;
 }
 
+/**
+ * Hook for managing audio controls in LiveKit.
+ * 
+ * Provides methods to enable/disable microphone, manage audio devices,
+ * and control audio visibility state.
+ * 
+ * @param {Room | null} room - LiveKit room instance
+ * @returns {AudioControls} Object containing audio control methods and state
+ * 
+ * @example
+ * ```tsx
+ * function AudioControls() {
+ *   const audioControls = useAudioControls(room);
+ *   
+ *   return (
+ *     <div>
+ *       <button onClick={audioControls.toggleAudio}>
+ *         {audioControls.isAudioEnabled ? 'Mute' : 'Unmute'}
+ *       </button>
+ *     </div>
+ *   );
+ * }
+ * ```
+ */
 export const useAudioControls = (room: Room | null): AudioControls => {
   const [isAudioEnabled, setIsAudioEnabled] = useState(false);
   const [isAudioMuted, setIsAudioMuted] = useState(false);

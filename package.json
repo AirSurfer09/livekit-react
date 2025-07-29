@@ -1,9 +1,10 @@
 {
   "name": "airsurfer-livekit-react",
   "version": "1.0.0",
-  "description": "A LiveKit React integration package for Convai",
+  "description": "A React package for integrating Convai's AI-powered voice assistants with LiveKit for real-time audio/video conversations",
   "type": "module",
   "main": "dist/index.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
@@ -11,11 +12,15 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "sideEffects": false,
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
     "clean": "rimraf dist",
     "prepublishOnly": "npm run clean && npm run build",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "npm run build && changeset publish",
     "example:react": "cd examples/react && pnpm dev",
     "example:react:build": "cd examples/react && pnpm build",
     "examples:dev": "pnpm example:react",
@@ -23,26 +28,45 @@
     "examples:install": "pnpm install && cd examples/react && pnpm install",
     "examples:clean": "pnpm clean && cd examples/react && pnpm clean"
   },
-  "keywords": ["livekit", "convai", "react", "typescript"],
-  "author": "",
+  "keywords": [
+    "livekit",
+    "convai",
+    "react",
+    "typescript",
+    "ai",
+    "voice-assistant",
+    "video-chat",
+    "real-time",
+    "webrtc"
+  ],
+  "author": "Your Name <your.email@example.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/airsurfer-livekit-react.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/airsurfer-livekit-react/issues"
+  },
+  "homepage": "https://github.com/yourusername/airsurfer-livekit-react#readme",
   "dependencies": {
     "@livekit/components-react": "^2.9.3",
     "@livekit/components-styles": "^1.1.4",
-    "livekit-client": "^2.8.0",
-    "framer-motion": "^11.18.0"
+    "framer-motion": "^11.18.0",
+    "livekit-client": "^2.8.0"
   },
   "devDependencies": {
-    "typescript": "^5.7.3",
-    "rimraf": "^5.0.0",
+    "@changesets/cli": "^2.29.5",
     "@types/node": "^20.17.13",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.7.3"
   },
   "files": [
     "dist",
     "README.md"
   ]
-} 
+}

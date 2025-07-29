@@ -1,10 +1,32 @@
 import { useCallback } from "react";
-import { Room, RoomEvent } from "livekit-client";
+import { Room, RoomEvent, DataPacket_Kind } from "livekit-client";
 import { ChatMessage } from "../types";
 import { logger } from "../utils/logger";
 
+/**
+ * Hook for handling incoming messages from Convai.
+ * 
+ * Sets up data message listeners to process various message types
+ * from the AI assistant and updates the chat message history.
+ * 
+ * @param {Room} room - LiveKit room instance
+ * @param {Function} setChatMessages - Function to update chat messages state
+ * @returns {Function} Cleanup function to remove message listeners
+ * 
+ * @example
+ * ```tsx
+ * function ChatComponent() {
+ *   const [chatMessages, setChatMessages] = useState([]);
+ *   const cleanup = useMessageHandler(room, setChatMessages);
+ *   
+ *   useEffect(() => {
+ *     return cleanup;
+ *   }, []);
+ * }
+ * ```
+ */
 export const useMessageHandler = (
-  room: Room | null,
+  room: Room,
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
 ) => {
   const handleDataReceived = useCallback(

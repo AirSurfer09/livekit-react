@@ -44,8 +44,6 @@ export interface ConvaiClient {
   state: ConvaiClientState;
   connect: (config: ConvaiConfig) => Promise<void>;
   disconnect: () => Promise<void>;
-  messages: any[];
-  transcriptions: any[];
   room: Room;
   videoTrack: any;
   audioTrack: any;

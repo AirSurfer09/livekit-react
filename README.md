@@ -107,6 +107,8 @@ const {
   updateDynamicInfo,        // Update dynamic info
   activity,                 // Current activity status
   chatMessages,             // Chat message history
+  audioControls,            // Audio control methods
+  videoControls,            // Video control methods
 } = useConvaiClient();
 ```
 
@@ -123,6 +125,39 @@ interface ConvaiConfig {
   actionConfig?: ActionConfig;       // Optional: Action configuration
 }
 ```
+
+### Components
+
+#### FloatingVideoDisplay
+
+A floating video display component that shows the local camera feed with optional mirroring.
+
+```tsx
+import { FloatingVideoDisplay } from 'airsurfer-livekit-react';
+
+function App() {
+  const [isVideoMirrored, setIsVideoMirrored] = useState(false);
+  
+  return (
+    <FloatingVideoDisplay
+      room={convaiClient.room}
+      videoTrack={convaiClient.videoTrack}
+      mirror={isVideoMirrored} // Enable horizontal mirroring
+    />
+  );
+}
+```
+
+**Props:**
+- `room?: Room | null` - LiveKit room instance
+- `videoTrack?: any` - Video track reference
+- `mirror?: boolean` - Whether to mirror the video horizontally (default: false)
+
+**Features:**
+- 📹 Local camera feed display
+- 🔄 Horizontal video mirroring (like a mirror reflection)
+- 📱 Responsive design with expand/collapse functionality
+- 🎨 Glass morphism UI styling
 
 ## Development
 
